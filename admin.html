@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es-PE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050d18">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Panel · Bien Helada</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%238fe3ff'/%3E%3Cpath d='M16 46V30M28 46V20M40 46V34M52 46V14' stroke='%2306101c' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <section class="login" id="login">
+    <form class="login-card" id="loginForm">
+      <div class="logo">❄</div>
+      <h1>Panel del negocio</h1>
+      <p id="loginHint">Ingresa tu clave de administrador.</p>
+      <input id="pass" type="password" autocomplete="current-password" placeholder="Clave" required>
+      <button class="btn btn-ice" type="submit">Entrar</button>
+      <div class="err" id="loginErr" hidden></div>
+      <a href="./" class="back">← Ir a la tienda</a>
+    </form>
+  </section>
+
+  <div class="app" id="app" hidden>
+    <aside class="side">
+      <div class="side-brand"><span>❄</span><b id="brand">Bien Helada</b></div>
+      <nav class="tabs" id="tabs">
+        <button data-tab="resumen" class="on"><i>📊</i><span>Resumen</span></button>
+        <button data-tab="pedidos"><i>🧾</i><span>Pedidos</span><b class="dot" id="pendDot" hidden>0</b></button>
+        <button data-tab="productos"><i>🍺</i><span>Productos</span></button>
+        <button data-tab="ajustes"><i>⚙️</i><span>Ajustes</span></button>
+      </nav>
+      <a class="side-link" href="./" target="_blank">Ver tienda ↗</a>
+    </aside>
+
+    <main class="main">
+      <header class="bar">
+        <div>
+          <h2 id="tabTitle">Resumen</h2>
+          <span class="sync" id="sync">—</span>
+        </div>
+        <div class="bar-actions">
+          <button class="ib" id="refresh" title="Actualizar" aria-label="Actualizar">↻</button>
+          <button class="ib" id="logout" title="Salir" aria-label="Salir">⏻</button>
+        </div>
+      </header>
+      <div class="demo-banner" id="demoBanner" hidden>Modo demo: datos de ejemplo guardados solo en este navegador. Conecta Google Sheets para usarlo de verdad (ver LEEME.md). <button id="resetDemo">Reiniciar demo</button></div>
+
+      <div class="period" id="periodBox">
+        <div class="pchips" id="pchips">
+          <button data-p="hoy">Hoy</button><button data-p="7d">7 días</button><button data-p="quincena" class="on">Quincena</button><button data-p="mes">Mes</button><button data-p="qant">Quinc. ant.</button><button data-p="mant">Mes ant.</button><button data-p="rango">Rango</button>
+        </div>
+        <div class="range" id="range" hidden><input type="date" id="rDesde"><span>a</span><input type="date" id="rHasta"><button class="btn-sm" id="rApply">Ver</button></div>
+        <p class="plabel" id="plabel"></p>
+      </div>
+
+      <section class="view" id="v-resumen"></section>
+      <section class="view" id="v-pedidos" hidden></section>
+      <section class="view" id="v-productos" hidden></section>
+      <section class="view" id="v-ajustes" hidden></section>
+    </main>
+  </div>
+
+  <div class="modal" id="modal" hidden><div class="modal-card" id="modalCard"></div></div>
+  <div class="toast" id="toast"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/draw.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

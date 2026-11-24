@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es-PE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#06101c">
+  <title>Bien Helada · Chelas heladas a tu puerta</title>
+  <meta name="description" content="Pide cerveza en botella, latas, packs y licores bien helados. Paga con Yape o por WhatsApp y te lo llevamos.">
+  <meta property="og:title" content="Bien Helada · Chelas heladas a tu puerta">
+  <meta property="og:description" content="Abre la exhibidora, elige y paga con Yape. Delivery rápido.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2306101c'/%3E%3Cpath d='M27 8h10v14c0 6 9 10 9 20v14a4 4 0 0 1-4 4H22a4 4 0 0 1-4-4V42c0-10 9-14 9-20z' fill='%23ffb43d'/%3E%3Crect x='18' y='38' width='28' height='12' fill='%238fe3ff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/store.css">
+</head>
+<body>
+  <!-- Verificación de edad (Ley 28681) -->
+  <div class="age" id="age" role="dialog" aria-modal="true" aria-labelledby="ageT" hidden>
+    <div class="age-card">
+      <div class="age-badge">+18</div>
+      <h2 id="ageT">¿Eres mayor de edad?</h2>
+      <p>Para entrar debes tener 18 años o más.</p>
+      <div class="age-btns">
+        <button class="btn btn-ice" id="ageYes">Sí, tengo +18</button>
+        <button class="btn btn-ghost" id="ageNo">No</button>
+      </div>
+      <p class="age-no" id="ageMsg" hidden>Vuelve cuando cumplas 18. ¡Te esperamos! 🧃</p>
+      <small>Prohibida la venta de bebidas alcohólicas a menores de 18 años.</small>
+    </div>
+  </div>
+
+  <header class="top">
+    <a class="brand" href="#inicio" aria-label="Inicio">
+      <span class="brand-ico" aria-hidden="true">❄</span>
+      <span class="brand-name" data-cfg="nombre">Bien Helada</span>
+    </a>
+    <span class="open-pill" id="openPill"><i></i><span>Abierto</span></span>
+    <button class="cart-btn" id="cartBtn" aria-label="Ver carrito">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20.5" r="1.4" fill="currentColor"/><circle cx="17" cy="20.5" r="1.4" fill="currentColor"/></svg>
+      <b class="cart-count" id="cartCount">0</b>
+    </button>
+  </header>
+
+  <div class="notice" id="notice" hidden></div>
+
+  <main id="inicio">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Delivery de chelas · <span data-cfg="horarioCorto">hoy</span></p>
+        <h1>Bien <em>heladas</em>,<br>directo a tu puerta.</h1>
+        <p class="hero-sub" data-cfg="slogan">Chelas bien heladas, directo a tu puerta</p>
+        <div class="hero-pay"><span class="chip-yape">Yape</span><span class="chip-wa">WhatsApp</span><span class="chip-time">⏱ 30–45 min</span></div>
+      </div>
+
+      <div class="stage" id="stage">
+        <div class="scene">
+          <div class="fridge" id="fridge">
+            <div class="f-sign"><span data-cfg="nombre">Bien Helada</span></div>
+            <div class="f-cab">
+              <div class="f-in">
+                <div class="led led-t"></div><div class="led led-l"></div><div class="led led-r"></div>
+                <div class="shelves" id="shelves"></div>
+              </div>
+              <div class="door door-l"><div class="glass"></div><span class="handle"></span></div>
+              <div class="door door-r"><div class="glass"></div><span class="handle"></span></div>
+            </div>
+            <div class="f-base"><span></span><span class="temp" id="temp">-2 °C</span></div>
+            <div class="f-side"></div>
+            <div class="f-top3d"></div>
+          </div>
+          <div class="mist" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="floor" aria-hidden="true"></div>
+        </div>
+        <button class="open-btn" id="openBtn" type="button"><span>Abrir la exhibidora</span></button>
+        <p class="stage-hint" id="stageHint">Toca una bebida para agregarla 👆</p>
+      </div>
+    </section>
+
+    <nav class="cats" id="cats" aria-label="Categorías"></nav>
+
+    <section class="catalog" id="catalogo">
+      <div class="cat-head">
+        <h2>Todo lo que hay</h2>
+        <label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="q" type="search" placeholder="Buscar: pilsen, pisco, hielo…" autocomplete="off" enterkeyhint="search"></label>
+      </div>
+      <div class="grid" id="grid"><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+    </section>
+
+    <section class="how">
+      <h2>Pedir es así de fácil</h2>
+      <ol>
+        <li><b>1</b><div><strong>Elige</strong><span>Toca las bebidas que quieras.</span></div></li>
+        <li><b>2</b><div><strong>Confirma</strong><span>Pon tu nombre y dirección.</span></div></li>
+        <li><b>3</b><div><strong>Paga</strong><span>Con Yape o coordina por WhatsApp.</span></div></li>
+      </ol>
+    </section>
+
+    <footer class="foot">
+      <div class="foot-info">
+        <p><strong data-cfg="nombre">Bien Helada</strong></p>
+        <p>🕓 <span data-cfg="horario"></span></p>
+        <p>🛵 <span data-cfg="zona"></span></p>
+        <p>💸 <span id="footDelivery"></span></p>
+        <a class="foot-wa" id="footWa" href="#" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>
+      </div>
+      <div class="legal">
+        <p><strong>PROHIBIDA LA VENTA DE BEBIDAS ALCOHÓLICAS A MENORES DE 18 AÑOS.</strong></p>
+        <p>TOMAR BEBIDAS ALCOHÓLICAS EN EXCESO ES DAÑINO. Si vas a manejar, no tomes.</p>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Barra inferior del carrito (celular) -->
+  <button class="cartbar" id="cartbar" type="button" hidden>
+    <span class="cb-count" id="cbCount">0</span>
+    <span class="cb-txt">Ver mi pedido</span>
+    <span class="cb-total" id="cbTotal">S/ 0.00</span>
+  </button>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Hoja del carrito / checkout -->
+  <div class="sheet-bg" id="sheetBg" hidden></div>
+  <aside class="sheet" id="sheet" aria-hidden="true" aria-label="Tu pedido">
+    <div class="sheet-grab" id="sheetGrab"><span></span></div>
+    <div class="sheet-head">
+      <button class="icon-btn" id="sheetBack" aria-label="Atrás" hidden>←</button>
+      <h3 id="sheetTitle">Tu pedido</h3>
+      <button class="icon-btn" id="sheetClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="steps" id="steps"><i class="on"></i><i></i><i></i></div>
+    <div class="sheet-body" id="sheetBody"></div>
+    <div class="sheet-foot" id="sheetFoot"></div>
+  </aside>
+
+  <script src="js/config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/draw.js"></script>
+  <script src="js/store.js"></script>
+</body>
+</html>
