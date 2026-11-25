@@ -80,7 +80,7 @@ var Intro = (function () {
 
   /* ---------------- Espuma (canvas) ---------------- */
   function foam(x, y) {
-    var cv = $('#inFoam'), c = cv.getContext('2d'), dpr = Math.min(devicePixelRatio || 1, 2);
+    var cv = $('#inFoam'), c = cv.getContext('2d'), dpr = Math.min(devicePixelRatio || 1, 1.5);
     cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; c.scale(dpr, dpr);
     var P = [], scale = Math.min(1.2, innerHeight / 760);
     for (var i = 0; i < 190; i++) {
@@ -107,7 +107,7 @@ var Intro = (function () {
   }
 
   /* ---------------- Barra de "enfriando" ---------------- */
-  var heroReady = false;
+  var heroReady = false, onCold = null;
   document.addEventListener('bh:hero-ready', function () { heroReady = true; });
   function loadingBar() {
     var bar = $('#inBar'), temp = $('#inTemp'), t0 = performance.now();
@@ -119,6 +119,7 @@ var Intro = (function () {
       var deg = Math.round(8 - nx * 10);
       temp.textContent = nx > .985 ? 'Bien helada · -2 °C ✓' : 'Enfriando… ' + deg + ' °C';
       $('#intro').classList.toggle('cold', nx > .985);
+      if (nx > .985 && el > 1.2 && onCold) { var f = onCold; onCold = null; f(); }
       requestAnimationFrame(tick);
     })();
   }
@@ -150,34 +151,43 @@ var Intro = (function () {
     setTimeout(exit, 1500);
   }
   function exit() {
-    var intro = $('#intro'), cap = $('#inBottle').getBoundingClientRect();
-    var x = cap.left + cap.width / 2, y = cap.top + 10, R = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 40;
+    var intro = $('#intro');
     finish();
     if (reduced || !intro.animate) { intro.remove(); return; }
-    var a = intro.animate([{ clipPath: 'circle(' + R + 'px at ' + x + 'px ' + y + 'px)', opacity: 1 }, { clipPath: 'circle(0px at ' + x + 'px ' + y + 'px)', opacity: 1 }],
-      { duration: 900, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'forwards' });
+    intro.classList.add('leaving');
+    var a = intro.animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(1.06)' }], { duration: 550, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
     var rm = function () { if (intro.isConnected) intro.remove(); };
-    a.onfinish = rm; setTimeout(rm, 1300);
+    a.onfinish = rm; setTimeout(rm, 900);
   }
 
   /* ---------------- Arranque ---------------- */
+  function phase(name) { var i = $('#intro'); i.classList.remove('ph-ask', 'ph-load', 'ph-tap'); i.classList.add('ph-' + name); }
   function start() {
     var intro = $('#intro'); if (!intro) return finish();
     document.documentElement.classList.add('intro-on');
-    if (adult) {
-      $('#inQ').hidden = true; $('#inNo').hidden = true; $('#inGoTxt').textContent = 'Toca para destapar';
-    }
-    loadingBar();
     // si Three.js no carga (sin internet / CDN caído) mostramos la foto
     setTimeout(function () { if (!window.__h3d) { var h = $('#hero'); if (h) h.classList.add('no3d'); heroReady = true; } }, 7000);
-    $('#inGo').addEventListener('pointerdown', Sound.unlock, { once: true });
-    $('#inGo').addEventListener('click', uncork);
-    $('#inBottle').addEventListener('click', function () { if (adult) uncork(); });
+    $('#inGo').addEventListener('click', function () {
+      Sound.unlock();
+      if (!adult) {
+        // 1) respondió que es mayor → 2) carga → 3) se destapa sola (el toque ya habilitó el sonido)
+        adult = true; localStorage.setItem('bh_18', '1');
+        phase('load'); loadingBar(); onCold = function () { setTimeout(uncork, 250); };
+      } else uncork();
+    });
+    $('#inBottle').addEventListener('click', function () { if (intro.classList.contains('ph-tap')) { Sound.unlock(); uncork(); } });
     $('#inNo').addEventListener('click', function () {
       $('#inMsg').hidden = false; $('#inGo').hidden = true; $('#inNo').hidden = true; $('#inQ').hidden = true;
     });
-    addEventListener('keydown', function (e) { if (!done && !opening && adult && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); uncork(); } });
-    setTimeout(function () { $('#inGo').focus({ preventScroll: true }); }, 300);
+    addEventListener('keydown', function (e) { if (!done && !opening && intro.classList.contains('ph-tap') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); Sound.unlock(); uncork(); } });
+    if (adult) {
+      // ya confirmó antes: carga y luego "toca para destapar" (el navegador exige un toque para el sonido)
+      $('#inGoTxt').textContent = 'Toca para destapar';
+      phase('load'); loadingBar(); onCold = function () { phase('tap'); $('#inGo').focus({ preventScroll: true }); };
+    } else {
+      $('#inGoTxt').textContent = 'Sí, soy mayor de edad';
+      phase('ask'); setTimeout(function () { $('#inGo').focus({ preventScroll: true }); }, 300);
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 

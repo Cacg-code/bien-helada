@@ -50,21 +50,33 @@
 
   /* ---------- exhibidora 3D ---------- */
   function cols() { return innerWidth >= 720 ? 4 : 3; }
+  function ml(p) { var m = String(p.presentacion).match(/([\d.]+)\s*(ml|l)\b/i); return m ? +m[1] * (/^l$/i.test(m[2]) ? 1000 : 1) : 600; }
+  function sizeOf(p) { return p.forma === 'lata' ? .6 : p.forma === 'botella' ? (ml(p) >= 500 ? 1 : .86) : .92; }
   function renderFridge() {
-    var c = cols(), slots = c * 4, list = S.prods.filter(function (p) { return p.destacado; })
-      .concat(S.prods.filter(function (p) { return !p.destacado; }));
-    if (!list.length) return;
-    var fill = []; for (var i = 0; i < slots; i++) fill.push(list[i % list.length]);
-    var html = '';
-    for (var r = 0; r < 4; r++) {
+    // como una exhibidora real: solo lo que va helado, varias unidades por producto y alturas reales
+    var c = cols(), all = S.prods;
+    var bottles = all.filter(function (p) { return p.forma === 'botella'; }).sort(function (x, y) { return ml(y) - ml(x) || (y.destacado - x.destacado); });
+    var cans = all.filter(function (p) { return p.forma === 'lata'; });
+    var others = all.filter(function (p) { return p.forma === 'otro'; });
+    if (!bottles.length) bottles = all.slice();
+    if (!bottles.length) return;
+    var big = bottles.filter(function (p) { return ml(p) >= 500; }), small = bottles.filter(function (p) { return ml(p) < 500; });
+    var plan = [big.length ? big : bottles, big.length > c ? big.slice(c).concat(small) : (small.length ? small : bottles),
+      small.length ? small : bottles, cans.length ? cans : (others.length ? others : bottles)];
+    var used = {}, html = '', k = 0;
+    plan.forEach(function (grp, r) {
+      var start = used[r] || 0;
       html += '<div class="shelf" style="--cols:' + c + '">';
-      fill.slice(r * c, r * c + c).forEach(function (p, j) {
-        var out = p.stock === 0;
-        html += '<button class="f-item' + (out ? ' out' : '') + '" data-add="' + esc(p.id) + '" style="--i:' + (r * c + j) + '" aria-label="Agregar ' + esc(p.nombre) + ' ' + money(p.precio) + '">' +
-          Draw.product(p, 'art') + '<span class="tag">' + money(p.precio).replace('S/ ', 'S/') + '</span></button>';
-      });
+      for (var j = 0; j < c; j++) {
+        var p = grp[(start + j) % grp.length], out = p.stock === 0, can = p.forma === 'lata';
+        var n = 3, imgs = '';
+        for (var f = n - 1; f >= 0; f--) imgs += '<span class="fc fc' + f + '">' + Draw.product(p, f ? 'art-b' : 'art') + '</span>';
+        html += '<button class="f-item' + (out ? ' out' : '') + (can ? ' is-can' : '') + '" data-add="' + esc(p.id) + '" style="--i:' + (k++) + ';--h:' + sizeOf(p) + '" aria-label="Agregar ' + esc(p.nombre) + ' ' + money(p.precio) + '">' +
+          '<span class="facing">' + imgs + '</span>' +
+          '<span class="tag"><small>' + esc(p.nombre.replace(/ lata$/i, '')) + '</small><b>' + money(p.precio).replace('S/ ', 'S/') + '</b></span></button>';
+      }
       html += '</div>';
-    }
+    });
     $('#shelves').innerHTML = html;
   }
   function openFridge() {
@@ -268,9 +280,10 @@
     var head = '<div class="ok-head"><div class="ok-check">✓</div><h4>¡Pedido registrado!</h4><p>' + (d.pago === 'yape' ? 'Solo falta tu Yape.' : 'Envíalo por WhatsApp para confirmarlo.') + '</p><span class="code">' + esc(r.codigo) + '</span></div>';
     if (d.pago === 'yape') {
       body.innerHTML = head + '<div class="pay-box"><h5>💜 Paga con Yape</h5>' +
+        '<button class="yape-go" data-yape="' + esc(c.yapeNumero) + '" data-monto="' + money(r.total) + '"><span class="yg-ico">Y</span><span><b>Abrir Yape y pagar ' + money(r.total) + '</b><small>Copiamos el número de la tienda por ti</small></span></button>' +
         '<div class="pay-row"><div><small>Monto exacto</small><b>' + money(r.total) + '</b></div><button class="copy" data-copy="' + r.total.toFixed(2) + '">Copiar</button></div>' +
         '<div class="pay-row"><div><small>Yape a ' + esc(c.yapeNombre) + '</small><b>' + esc(c.yapeNumero.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3')) + '</b></div><button class="copy" data-copy="' + esc(c.yapeNumero) + '">Copiar</button></div>' +
-        '<ol class="pay-steps"><li>Abre Yape → <b>Yapear</b> → pega el número.</li><li>Pon el monto <b>' + money(r.total) + '</b> y en el mensaje: <b>' + esc(r.codigo) + '</b>.</li><li>Toca el botón verde y mándanos la captura.</li></ol>' +
+        '<ol class="pay-steps"><li>En Yape toca <b>Yapear</b> → <b>pega</b> el número (ya está copiado).</li><li>Pon el monto <b>' + money(r.total) + '</b> y en el mensaje: <b>' + esc(r.codigo) + '</b>.</li><li>Toca el botón verde y mándanos la captura.</li></ol>' +
         (c.yapeQR ? '<div class="qr"><img src="' + esc(c.yapeQR) + '" alt="QR de Yape"><a href="' + esc(c.yapeQR) + '" download="yape-' + esc(c.nombre) + '.png">⬇ Guardar QR (para escanear desde la galería)</a></div>' : '') +
         '</div>';
       foot.innerHTML = '<a class="btn btn-wa btn-block" target="_blank" rel="noopener" href="' + waLink(waText(r, d)) + '">Ya yapeé · enviar captura</a><button class="btn btn-ghost btn-block" data-close>Seguir comprando</button>';
@@ -281,6 +294,19 @@
     }
   }
 
+  /* Yape no permite (para cuentas personales) abrir la app con número y monto ya puestos:
+   * copiamos el número, mostramos el monto y abrimos la app directo. */
+  function openYape(btn) {
+    var num = btn.getAttribute('data-yape'), monto = btn.getAttribute('data-monto');
+    var go = function () {
+      toast('📋 Número copiado · en Yape: Yapear → pegar → ' + monto);
+      buzz(15);
+      if (/android/i.test(navigator.userAgent)) {
+        setTimeout(function () { location.href = 'intent://#Intent;package=com.bcp.innovacxion.yapeapp;S.browser_fallback_url=' + encodeURIComponent('https://play.google.com/store/apps/details?id=com.bcp.innovacxion.yapeapp') + ';end'; }, 700);
+      } else btn.querySelector('small').textContent = 'Número copiado ✓ · abre Yape y pégalo';
+    };
+    if (navigator.clipboard && isSecureContext) navigator.clipboard.writeText(num).then(go, go); else go();
+  }
   function copy(btn) {
     var v = btn.getAttribute('data-copy');
     var done = function () { btn.textContent = '¡Copiado!'; btn.classList.add('done'); buzz(15); setTimeout(function () { btn.textContent = 'Copiar'; btn.classList.remove('done'); }, 1800); };
@@ -300,7 +326,8 @@
 
   /* ---------- eventos ---------- */
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-add],[data-inc],[data-dec],[data-cat],[data-go],[data-close],[data-copy]');
+    var t = e.target.closest('[data-add],[data-inc],[data-dec],[data-cat],[data-go],[data-close],[data-copy],[data-yape]');
+    if (t && t.hasAttribute('data-yape')) return openYape(t);
     if (!t) return;
     if (t.dataset.add) { var p = S.byId[t.dataset.add]; if (p && p.stock === 0) { toast(p.nombre + ' está agotado'); return; } setQty(t.dataset.add, (S.cart[t.dataset.add] || 0) + 1, t); }
     else if (t.dataset.inc) setQty(t.dataset.inc, (S.cart[t.dataset.inc] || 0) + 1, t.closest('.card') ? t : null);

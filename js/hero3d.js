@@ -19,8 +19,9 @@ async function main() {
   try { await Promise.race([document.fonts.load('900 100px Archivo'), new Promise(r => setTimeout(r, 1500))]); } catch (e) {}
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-  let dprCap = isTouch ? 1.6 : 2;
+  let dprCap = isTouch ? 1.5 : 2;
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, dprCap));
+  if ('transmissionResolutionScale' in renderer) renderer.transmissionResolutionScale = isTouch ? .5 : .75;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
 
@@ -165,7 +166,7 @@ async function main() {
 
   // gotas en relieve (algunas gotas grandes de verdad sobre el vidrio)
   const dropGeo = new THREE.SphereGeometry(1, 10, 8);
-  const dropMat = new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0, transmission: 1, thickness: .05, ior: 1.33, clearcoat: 1 });
+  const dropMat = new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0, transparent: true, opacity: .45, clearcoat: 1, envMapIntensity: 2 });
   const DN = isTouch ? 70 : 140;
   const drops = new THREE.InstancedMesh(dropGeo, dropMat, DN);
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s3 = new THREE.Vector3(), p3 = new THREE.Vector3();
@@ -256,10 +257,10 @@ async function main() {
   addEventListener('scroll', () => { scrollP = Math.min(1, Math.max(0, scrollY / (H || 1))); }, { passive: true });
 
   /* ---------- entrada tras destapar ---------- */
-  let intro = 0, introOn = false, introT0 = 0;
-  const startIntro = () => { introOn = true; introT0 = performance.now(); hero.classList.add('is-live'); };
-  if (!document.getElementById('intro') || window.Intro === undefined) startIntro();
-  else window.Intro.ready(startIntro);
+  let intro = 0, introOn = false, introT0 = 0, paused = !!document.getElementById('intro');
+  const startIntro = () => { introOn = true; paused = false; introT0 = performance.now() + 150; hero.classList.add('is-live'); last = performance.now(); loop(); };
+  // se llama después de definir el bucle (más abajo)
+  queueMicrotask(() => { if (!document.getElementById('intro') || window.Intro === undefined) startIntro(); else window.Intro.ready(startIntro); });
 
   /* ---------- bucle ---------- */
   let visible = true, last = performance.now(), slow = 0, frames = 0, t = 0;
@@ -278,7 +279,7 @@ async function main() {
       if (slow > 45 && dprCap > 1) { dprCap = 1; renderer.setPixelRatio(1); resize(); drops.visible = false; mist.forEach(m => m.visible = false); }
       frames = 0; slow = 0;
     }
-    if (introOn && intro < 1) intro = reduced ? 1 : Math.min(1, (now - introT0) / 1800);
+    if (introOn && intro < 1) intro = reduced ? 1 : Math.max(0, Math.min(1, (now - introT0) / 1800));
     const e = ease(intro);
 
     if (!drag) { vel += ((reduced ? 0 : .32) + boost * 6 - vel) * Math.min(1, dt * 1.6); boost *= Math.pow(.02, dt); }
@@ -310,7 +311,7 @@ async function main() {
     renderer.render(scene, camera);
     if (visible && !document.hidden) loop();
   }
-  function loop() { if (!raf) raf = requestAnimationFrame(frame); }
+  function loop() { if (!raf && !paused) raf = requestAnimationFrame(frame); }
 
   renderer.compile(scene, camera);
   renderer.render(scene, camera);

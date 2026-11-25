@@ -6,7 +6,7 @@ html.intro-on, html.intro-on body { overflow: hidden; }
   padding: max(16px, env(safe-area-inset-top)) 20px max(18px, env(safe-area-inset-bottom)); overflow: hidden; color: var(--text);
   background: radial-gradient(120% 70% at 50% 38%, #12324f 0%, #071526 48%, #030912 100%); }
 .in-bg { position: absolute; inset: 0; pointer-events: none; }
-.in-bg i { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .55; animation: inDrift 9s ease-in-out infinite alternate; }
+.in-bg i { position: absolute; border-radius: 50%; opacity: .55; animation: inDrift 9s ease-in-out infinite alternate; }
 .in-bg i:nth-child(1) { width: 60vmax; height: 60vmax; left: -20vmax; top: -18vmax; background: radial-gradient(circle, rgba(143, 227, 255, .35), transparent 65%); }
 .in-bg i:nth-child(2) { width: 55vmax; height: 55vmax; right: -22vmax; bottom: -20vmax; background: radial-gradient(circle, rgba(255, 180, 61, .28), transparent 65%); animation-delay: -4s; }
 .in-bg i:nth-child(3) { width: 40vmax; height: 40vmax; left: 50%; top: 30%; transform: translateX(-50%); background: radial-gradient(circle, rgba(201, 243, 255, .18), transparent 65%); animation-duration: 6s; }
@@ -75,6 +75,16 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 @media (max-height: 640px) { .in-bottle { --h: 40vh; } .in-ui { gap: 7px; margin-top: 1.6vh; } .in-legal { display: none; } }
 @media (min-width: 900px) { .in-bottle { --h: min(54vh, 480px); } }
 @media (prefers-reduced-motion: reduce) { .intro *, .intro *::before, .intro *::after { animation: none !important; } }
+
+/* fases: pregunta → carga → destapar */
+.intro.ph-ask .in-load, .intro.ph-ask .in-temp { display: none; }
+.intro.ph-load .in-q, .intro.ph-load .in-go, .intro.ph-load .in-no { display: none; }
+.intro.ph-tap .in-q, .intro.ph-tap .in-no, .intro.ph-tap .in-load { display: none; }
+.intro.ph-load .in-temp, .intro.ph-tap .in-temp { font-size: 14px; }
+.intro.ph-load .in-temp::before { content: 'Destapando en un momento · '; color: var(--muted); font-weight: 600; }
+.intro.ph-tap .in-go { animation: inUp .5s both cubic-bezier(.2, .8, .2, 1), inHalo 2.2s .5s infinite; }
+.intro.leaving { pointer-events: none; will-change: opacity, transform; }
+.intro.leaving .in-bg i, .intro.leaving .in-bottle, .intro.leaving .in-shine::before { animation-play-state: paused; }
 
 /* ================= HERO 3D ================= */
 .h3d { position: relative; min-height: calc(100svh - 60px); overflow: hidden; isolation: isolate;
