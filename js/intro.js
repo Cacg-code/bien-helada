@@ -4,7 +4,7 @@
 var Intro = (function () {
   var $ = function (s) { return document.querySelector(s); };
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var done = false, waiters = [], adult = localStorage.getItem('bh_18') === '1';
+  var done = false, waiters = [], adult = false; // se pregunta en cada visita
 
   function ready(fn) { if (done) fn(); else waiters.push(fn); }
   function finish() {
