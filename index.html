@@ -15,33 +15,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/store.css">
   <link rel="stylesheet" href="css/intro.css">
-  <link rel="preload" href="img/intro-botella.webp" as="image">
   <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }</script>
 </head>
 <body>
-  <!-- Pantalla de carga: destapar la botella (incluye verificación de edad, Ley 28681) -->
+  <!-- Pantalla de entrada: cae la caja, sale la botella, se verifica la edad (Ley 28681) y se destapa -->
   <div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="inQ">
-    <div class="in-bg" aria-hidden="true"><i></i><i></i><i></i></div>
+    <canvas class="in-cv" aria-hidden="true"></canvas>
+    <img class="in-fallback" src="img/intro-botella.webp" alt="" width="234" height="900">
     <p class="in-brand"><span aria-hidden="true">❄</span> <span data-cfg="nombre">Bien Helada</span></p>
-    <div class="in-stage">
-      <div class="in-bottle" id="inBottle">
-        <img class="in-body" src="img/intro-botella.webp" alt="" width="234" height="900" fetchpriority="high">
-        <img class="in-cap" id="inCap" src="img/intro-tapa.webp" alt="" width="112" height="38">
-        <span class="in-shine" aria-hidden="true"></span>
-        <span class="in-vapor" id="inVapor" aria-hidden="true"></span>
-      </div>
-      <span class="in-shadow" aria-hidden="true"></span>
-    </div>
-    <canvas class="in-foam" id="inFoam" aria-hidden="true"></canvas>
+    <p class="in-temp" id="inTemp" aria-live="polite">Enfriando…</p>
     <div class="in-ui" id="inUi">
-      <p class="in-q" id="inQ">¿Eres mayor de 18 años?</p>
-      <button class="in-go" id="inGo" type="button"><span class="in-go-ico" aria-hidden="true">🍾</span><span id="inGoTxt">Sí, destapar</span></button>
+      <span class="in-kick">Antes de entrar</span>
+      <p class="in-q" id="inQ">¿Tienes 18 años o más?</p>
+      <button class="in-go" id="inGo" type="button"><span aria-hidden="true">🍺</span> Sí · Destapar</button>
       <button class="in-no" id="inNo" type="button">No, soy menor</button>
       <p class="in-msg" id="inMsg" hidden>Vuelve cuando cumplas 18. ¡Te esperamos! 🧃</p>
-      <div class="in-load" aria-hidden="true"><i id="inBar"></i></div>
-      <small class="in-temp" id="inTemp">Enfriando… 8 °C</small>
       <small class="in-legal">🔊 Con sonido · Prohibida la venta de alcohol a menores de 18 años</small>
     </div>
+    <div class="in-flash" id="inFlash" aria-hidden="true"></div>
     <p class="in-salud" id="inSalud" aria-hidden="true">¡Salud!</p>
   </div>
 

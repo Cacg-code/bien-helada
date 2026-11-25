@@ -1,10 +1,10 @@
-/* intro.js — Pantalla de carga: se destapa la botella (con sonido) y verifica la edad.
+/* intro.js — Pantalla de entrada: cae una caja (3D en js/intro3d.js), sale una botella, verifica la edad y se destapa (con sonido).
  * El sonido se sintetiza con Web Audio (sin archivos): "pop" del gas, tapa que cae y burbujeo.
  * Al terminar emite el evento 'bh:intro-done'. */
 var Intro = (function () {
   var $ = function (s) { return document.querySelector(s); };
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var done = false, waiters = [], adult = false; // se pregunta en cada visita
+  var done = false, waiters = []; // la edad se pregunta en cada visita
 
   function ready(fn) { if (done) fn(); else waiters.push(fn); }
   function finish() {
@@ -78,116 +78,66 @@ var Intro = (function () {
     };
   })();
 
-  /* ---------------- Espuma (canvas) ---------------- */
-  function foam(x, y) {
-    var cv = $('#inFoam'), c = cv.getContext('2d'), dpr = Math.min(devicePixelRatio || 1, 1.5);
-    cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; c.scale(dpr, dpr);
-    var P = [], scale = Math.min(1.2, innerHeight / 760);
-    for (var i = 0; i < 190; i++) {
-      var a = -Math.PI / 2 + (Math.random() - .5) * (i < 120 ? .7 : 1.7), v = (5 + Math.random() * 13) * scale;
-      P.push({ x: x + (Math.random() - .5) * 10, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: 1.2 + Math.random() * (i < 150 ? 4 : 9),
-        life: 0, max: 50 + Math.random() * 50, gold: Math.random() < .35 });
-    }
-    var t0 = performance.now(), last = t0;
-    (function frame(now) {
-      var dt = Math.min(2.2, (now - last) / 16.7); last = now;
-      c.clearRect(0, 0, innerWidth, innerHeight);
-      var alive = 0;
-      P.forEach(function (p) {
-        if (p.life > p.max) return; alive++;
-        p.life += dt; p.vy += .32 * dt; p.vx *= Math.pow(.985, dt); p.x += p.vx * dt; p.y += p.vy * dt;
-        var k = 1 - p.life / p.max;
-        c.globalAlpha = Math.max(0, k * .95);
-        c.fillStyle = p.gold ? '#ffe2a3' : '#fffaf0';
-        c.beginPath(); c.arc(p.x, p.y, p.r * (.6 + k * .4), 0, 6.283); c.fill();
-        if (p.r > 5) { c.globalAlpha *= .5; c.fillStyle = '#fff'; c.beginPath(); c.arc(p.x - p.r * .3, p.y - p.r * .3, p.r * .25, 0, 6.283); c.fill(); }
-      });
-      if (alive) requestAnimationFrame(frame); else c.clearRect(0, 0, innerWidth, innerHeight);
-    })(t0);
+  /* ---------------- Caja 3D (js/intro3d.js) ---------------- */
+  var api = null, exiting = false, opening = false, isReady = false, fellBack = false;
+  function showUI() {
+    if (isReady) return; isReady = true;
+    $('#intro').classList.add('ready');
+    setTimeout(function () { $('#inGo').focus({ preventScroll: true }); }, 400);
   }
-
-  /* ---------------- Barra de "enfriando" ---------------- */
-  var heroReady = false, onCold = null;
-  document.addEventListener('bh:hero-ready', function () { heroReady = true; });
-  function loadingBar() {
-    var bar = $('#inBar'), temp = $('#inTemp'), t0 = performance.now();
-    (function tick() {
-      if (done || !bar) return;
-      var el = (performance.now() - t0) / 1000, p = heroReady ? 1 : Math.min(.92, 1 - Math.exp(-el / 1.4));
-      var cur = parseFloat(bar.style.getPropertyValue('--p')) || 0, nx = cur + (p - cur) * .12;
-      bar.style.setProperty('--p', nx.toFixed(3));
-      var deg = Math.round(8 - nx * 10);
-      temp.textContent = nx > .985 ? 'Bien helada · -2 °C ✓' : 'Enfriando… ' + deg + ' °C';
-      $('#intro').classList.toggle('cold', nx > .985);
-      if (nx > .985 && el > 1.2 && onCold) { var f = onCold; onCold = null; f(); }
-      requestAnimationFrame(tick);
-    })();
+  function fallback(e) {
+    if (api || fellBack) return; fellBack = true;
+    if (e) console.warn('Intro 3D desactivada:', e);
+    $('#intro').classList.add('no3d'); setTimeout(showUI, 500);
+  }
+  function load3d() {
+    var t = setTimeout(function () { fallback('tardó demasiado'); }, 9000);
+    import(new URL('js/intro3d.js', document.baseURI).href)
+      .then(function (m) { return m.run($('#intro'), { ready: showUI, opened: exit }); })
+      .then(function (a) { clearTimeout(t); if (fellBack) { a.dispose(); return; } api = a; })
+      .catch(function (e) { clearTimeout(t); fallback(e); });
   }
 
   /* ---------------- Destapar ---------------- */
-  var opening = false;
   function uncork() {
     if (opening) return; opening = true;
-    localStorage.setItem('bh_18', '1');
-    Sound.open();
+    Sound.unlock(); Sound.open();
     if (navigator.vibrate) try { navigator.vibrate([12, 40, 30]); } catch (e) {}
-    var intro = $('#intro'), cap = $('#inCap'), bottle = $('#inBottle');
-    intro.classList.add('opening');
-    var r = cap.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height * .8;
-
-    if (reduced) { intro.classList.add('salud'); setTimeout(exit, 700); return; }
-
-    bottle.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-2.5deg)' }, { transform: 'rotate(2deg)' }, { transform: 'rotate(-1deg) translateY(4px)' }, { transform: 'rotate(0) translateY(0)' }],
-      { duration: 420, easing: 'ease-out' });
-    var dir = innerWidth > 700 ? 1 : .6;
-    cap.animate([
-      { transform: 'translate(0,0) rotate(0)', opacity: 1 },
-      { transform: 'translate(' + 60 * dir + 'px,-' + innerHeight * .42 + 'px) rotate(260deg) rotateX(60deg)', opacity: 1, offset: .45 },
-      { transform: 'translate(' + 150 * dir + 'px,-' + innerHeight * .2 + 'px) rotate(520deg) rotateX(120deg)', opacity: 1, offset: .75 },
-      { transform: 'translate(' + 210 * dir + 'px,' + innerHeight * .55 + 'px) rotate(760deg) rotateX(170deg)', opacity: 0 }
-    ], { duration: 1150, easing: 'cubic-bezier(.15,.7,.4,1)', fill: 'forwards' });
-    foam(cx, cy);
-    setTimeout(function () { intro.classList.add('salud'); }, 480);
-    setTimeout(exit, 1500);
+    var intro = $('#intro'); intro.classList.add('opening');
+    if (api) api.open();
+    if (!reduced && intro.animate) {
+      $('#inFlash').animate([{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 0 }], { duration: 700, easing: 'ease-out' });
+      setTimeout(function () { $('#inSalud').animate([{ opacity: 0, transform: 'scale(.5) rotate(-8deg)' }, { opacity: 1, transform: 'scale(1.1) rotate(-3deg)', offset: .55 }, { opacity: 1, transform: 'scale(1) rotate(-3deg)' }], { duration: 650, fill: 'forwards', easing: 'cubic-bezier(.2,.9,.3,1.3)' }); }, 300);
+    } else $('#inSalud').style.opacity = 1;
+    if (!api) setTimeout(exit, 1300); // sin 3D sale por tiempo; con 3D avisa la escena
   }
   function exit() {
+    if (done || exiting) return; exiting = true;
     var intro = $('#intro');
-    finish();
-    if (reduced || !intro.animate) { intro.remove(); return; }
+    // primero se desvanece la intro y recién luego arranca el hero (su primer cuadro es pesado) y se libera la GPU
+    var rm = function () {
+      if (!intro.isConnected) return; intro.remove(); finish();
+      var a3 = api; api = null; if (a3) setTimeout(function () { a3.dispose(); }, 600);
+    };
+    if (reduced || !intro.animate) return rm();
     intro.classList.add('leaving');
     var a = intro.animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(1.06)' }], { duration: 550, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
-    var rm = function () { if (intro.isConnected) intro.remove(); };
     a.onfinish = rm; setTimeout(rm, 900);
   }
 
   /* ---------------- Arranque ---------------- */
-  function phase(name) { var i = $('#intro'); i.classList.remove('ph-ask', 'ph-load', 'ph-tap'); i.classList.add('ph-' + name); }
   function start() {
     var intro = $('#intro'); if (!intro) return finish();
     document.documentElement.classList.add('intro-on');
-    // si Three.js no carga (sin internet / CDN caído) mostramos la foto
-    setTimeout(function () { if (!window.__h3d) { var h = $('#hero'); if (h) h.classList.add('no3d'); heroReady = true; } }, 7000);
-    $('#inGo').addEventListener('click', function () {
-      Sound.unlock();
-      if (!adult) {
-        // 1) respondió que es mayor → 2) carga → 3) se destapa sola (el toque ya habilitó el sonido)
-        adult = true; localStorage.setItem('bh_18', '1');
-        phase('load'); loadingBar(); onCold = function () { setTimeout(uncork, 250); };
-      } else uncork();
-    });
-    $('#inBottle').addEventListener('click', function () { if (intro.classList.contains('ph-tap')) { Sound.unlock(); uncork(); } });
+    // si Three.js no carga (sin internet / CDN caído) el hero muestra la foto
+    setTimeout(function () { if (!window.__h3d) { var h = $('#hero'); if (h) h.classList.add('no3d'); } }, 9000);
+    $('#inGo').addEventListener('click', uncork);
     $('#inNo').addEventListener('click', function () {
       $('#inMsg').hidden = false; $('#inGo').hidden = true; $('#inNo').hidden = true; $('#inQ').hidden = true;
+      if (api) api.no();
     });
-    addEventListener('keydown', function (e) { if (!done && !opening && intro.classList.contains('ph-tap') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); Sound.unlock(); uncork(); } });
-    if (adult) {
-      // ya confirmó antes: carga y luego "toca para destapar" (el navegador exige un toque para el sonido)
-      $('#inGoTxt').textContent = 'Toca para destapar';
-      phase('load'); loadingBar(); onCold = function () { phase('tap'); $('#inGo').focus({ preventScroll: true }); };
-    } else {
-      $('#inGoTxt').textContent = 'Sí, soy mayor de edad';
-      phase('ask'); setTimeout(function () { $('#inGo').focus({ preventScroll: true }); }, 300);
-    }
+    var gl = document.createElement('canvas');
+    if (gl.getContext('webgl2') || gl.getContext('webgl')) load3d(); else fallback();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 
