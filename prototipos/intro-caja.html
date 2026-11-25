@@ -118,11 +118,10 @@ async function main() {
   try { await Promise.race([document.fonts.load('900 100px Archivo'), new Promise(r => setTimeout(r, 1500))]); } catch (e) {}
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, isTouch ? 1.6 : 2));
+  let pr = Math.min(devicePixelRatio || 1, isTouch ? 1.3 : 1.5); renderer.setPixelRatio(pr);
   renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  if ('transmissionResolutionScale' in renderer) renderer.transmissionResolutionScale = isTouch ? .5 : .75;
+  renderer.shadowMap.enabled = false; // sombra falsa (sprite) en vez de shadow maps: mucho más liviano
 
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -163,7 +162,7 @@ async function main() {
     og.putImageData(img, 0, 0);
     const t = new THREE.CanvasTexture(out); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
   }
-  const dropsN = dropletNormals(isTouch ? 256 : 512, isTouch ? 260 : 900, isTouch ? 6 : 9); dropsN.repeat.set(3, 3);
+  const dropsN = dropletNormals(256, 320, 6); dropsN.repeat.set(3, 3);
 
   const labelTex = tex(cv(1024, 380, (g, w, h) => {
     const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#f6fbff'); bg.addColorStop(1, '#d6edf8'); g.fillStyle = bg; g.fillRect(0, 0, w, h);
@@ -205,6 +204,9 @@ async function main() {
   const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: soft, color: '#2f86c9', transparent: true, opacity: .35, depthWrite: false }));
   glow.scale.set(18, 12, 1); glow.position.set(0, 4, -6); scene.add(glow);
 
+  const blob = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: soft, color: '#000', transparent: true, opacity: .8, depthWrite: false }));
+  blob.rotation.x = -Math.PI / 2; blob.position.y = .01; scene.add(blob);
+
   /* ---------- botellas ---------- */
   const P = [[0, 0], [.33, 0], [.39, .015], [.415, .06], [.42, .14], [.42, 1.56], [.412, 1.7], [.38, 1.86], [.3, 2.04], [.215, 2.2], [.163, 2.36], [.148, 2.55], [.146, 2.8], [.162, 2.82], [.168, 2.87], [.163, 2.92], [.15, 2.94], [.0, 2.95]];
   const glassGeo = new THREE.LatheGeometry(P.map(([x, y]) => new THREE.Vector2(x, y)), isTouch ? 48 : 72);
@@ -213,22 +215,20 @@ async function main() {
   const neckGeo = new THREE.CylinderGeometry(.152, .166, .34, 48, 1, true);
   const capGeo = new THREE.CylinderGeometry(.168, .18, .085, 84, 2);
   { const p = capGeo.attributes.position; for (let i = 0; i < p.count; i++) { const x = p.getX(i), z = p.getZ(i), y = p.getY(i), r = Math.hypot(x, z); if (r > .1) { const a = Math.atan2(z, x), k = 1 + .045 * Math.cos(a * 21) * (y < 0 ? 1 : .5); p.setX(i, x * k); p.setZ(i, z * k); } } capGeo.computeVertexNormals(); }
-  const heroGlass = new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: .07, transmission: 1, thickness: .35, ior: 1.52, attenuationColor: new THREE.Color('#b0630f'), attenuationDistance: .55,
-    clearcoat: 1, clearcoatRoughness: .04, clearcoatNormalMap: dropsN, clearcoatNormalScale: new THREE.Vector2(1.1, 1.1), normalMap: dropsN, normalScale: new THREE.Vector2(.35, .35), envMapIntensity: 1.3 });
-  const cheapGlass = new THREE.MeshPhysicalMaterial({ color: '#4a2205', roughness: .1, metalness: 0, clearcoat: 1, clearcoatRoughness: .05, clearcoatNormalMap: dropsN, clearcoatNormalScale: new THREE.Vector2(.9, .9), envMapIntensity: 1.6, sheen: .4, sheenColor: new THREE.Color('#ffb15a') });
+  const heroGlass = new THREE.MeshPhysicalMaterial({ color: '#7a3806', roughness: .05, metalness: .1, clearcoat: 1, clearcoatRoughness: .03, clearcoatNormalMap: dropsN, clearcoatNormalScale: new THREE.Vector2(1, 1),
+    sheen: .25, sheenColor: new THREE.Color('#ffc46b'), emissive: '#6a2c00', emissiveIntensity: .45, envMapIntensity: 2.2 });
+  const cheapGlass = new THREE.MeshStandardMaterial({ color: '#4a2205', roughness: .12, metalness: .15, envMapIntensity: 1.7 });
+  const labelCheap = new THREE.MeshStandardMaterial({ map: labelTex, roughness: .45 });
   const labelMat = new THREE.MeshPhysicalMaterial({ map: labelTex, roughness: .45, clearcoat: .6, clearcoatRoughness: .2, clearcoatNormalMap: dropsN, clearcoatNormalScale: new THREE.Vector2(.6, .6) });
   const neckMat = new THREE.MeshPhysicalMaterial({ map: neckTex, metalness: .75, roughness: .28, clearcoat: .8 });
+  const capCheap = new THREE.MeshStandardMaterial({ color: '#a50f1d', metalness: .8, roughness: .3 });
   const capMats = [new THREE.MeshPhysicalMaterial({ color: '#b0101f', metalness: .9, roughness: .25, clearcoat: 1 }), new THREE.MeshPhysicalMaterial({ map: capTex, metalness: .6, roughness: .3, clearcoat: 1 }), new THREE.MeshPhysicalMaterial({ color: '#7a0a14', metalness: .9, roughness: .3 })];
   function makeBottle(hero) {
     const b = new THREE.Group();
     const gl = new THREE.Mesh(glassGeo, hero ? heroGlass : cheapGlass); gl.castShadow = true; b.add(gl);
-    if (hero) {
-      const L = P.filter(([, y]) => y <= 2.3).map(([x, y]) => new THREE.Vector2(Math.max(0, x * .9), Math.max(.04, y))); L.push(new THREE.Vector2(.17, 2.3), new THREE.Vector2(0, 2.3));
-      b.add(new THREE.Mesh(new THREE.LatheGeometry(L, 48), new THREE.MeshPhysicalMaterial({ color: '#c0700c', emissive: '#6a3000', emissiveIntensity: .3, roughness: .25, sheen: .6, sheenColor: new THREE.Color('#ffd27f') })));
-    }
-    const lb = new THREE.Mesh(labelGeo, labelMat); lb.position.y = .82; lb.rotation.y = Math.PI; b.add(lb);
+    const lb = new THREE.Mesh(labelGeo, hero ? labelMat : labelCheap); lb.position.y = .82; lb.rotation.y = Math.PI; b.add(lb);
     const nk = new THREE.Mesh(neckGeo, neckMat); nk.position.y = 2.42; b.add(nk);
-    const cp = new THREE.Mesh(capGeo, capMats); cp.position.y = 2.975; cp.castShadow = true; b.add(cp);
+    const cp = new THREE.Mesh(capGeo, hero ? capMats : capCheap); cp.position.y = 2.975; cp.castShadow = true; b.add(cp);
     b.userData.cap = cp;
     return b;
   }
@@ -242,7 +242,7 @@ async function main() {
     const s = new THREE.Shape(); const o = rr(-w / 2, 0, w, h, .06); s.curves = o.curves; s.currentPoint = o.currentPoint;
     s.holes.push(rr(-.6, h - .5, 1.2, .3, .14));
     slots.forEach(([x0, x1]) => { for (let x = x0; x <= x1 + 1e-6; x += .22) s.holes.push(rr(x - .06, .3, .12, .72, .06)); });
-    const g = new THREE.ExtrudeGeometry(s, { depth: .1, bevelEnabled: true, bevelThickness: .02, bevelSize: .02, bevelSegments: 2, curveSegments: 5 });
+    const g = new THREE.ExtrudeGeometry(s, { depth: .1, bevelEnabled: true, bevelThickness: .02, bevelSize: .02, bevelSegments: 1, curveSegments: 3 });
     g.translate(0, 0, -.05); return g;
   }
   const CW = 4.24, CD = 3.24, CH = 1.7;
@@ -287,12 +287,12 @@ async function main() {
     }
   }
   function impactDust() {
-    for (let i = 0; i < (isTouch ? 26 : 40); i++) {
+    for (let i = 0; i < (isTouch ? 12 : 18); i++) {
       const a = Math.random() * 6.283, r = 2.2 + Math.random() * .6;
       spawn({ map: cloud, p: new THREE.Vector3(Math.cos(a) * r * 1.1, .15 + Math.random() * .2, Math.sin(a) * r * .8), v: new THREE.Vector3(Math.cos(a) * (3 + Math.random() * 4), .4 + Math.random() * 1.4, Math.sin(a) * (3 + Math.random() * 4)),
         life: 1 + Math.random() * .8, s0: .8, s1: 3 + Math.random() * 2, o: .55, drag: 2.4, color: '#cdeeff' });
     }
-    for (let i = 0; i < 26; i++) { // escarcha que salta
+    for (let i = 0; i < 14; i++) { // escarcha que salta
       const a = Math.random() * 6.283;
       spawn({ p: new THREE.Vector3(Math.cos(a) * 1.8, 1.6, Math.sin(a) * 1.3), v: new THREE.Vector3(Math.cos(a) * (1 + Math.random() * 2.5), 3 + Math.random() * 4, Math.sin(a) * (1 + Math.random() * 2.5)),
         life: 1.1, s0: .1, s1: .06, o: 1, g: -16, drag: .3, floor: true, color: '#ffffff' });
@@ -343,6 +343,7 @@ async function main() {
     }
     crate.position.y = y; crate.rotation.set(rx, ry, rz); crateInner.scale.set(1 + (1 - sq) * .5, sq, 1 + (1 - sq) * .5);
     crate.visible = t > T.fall0 - .05;
+    { const k = clamp01(1 - y / 11); blob.visible = crate.visible; blob.scale.set(6.6 * (1.4 - .4 * k), 5.2 * (1.4 - .4 * k), 1); blob.material.opacity = .85 * k * k; }
 
     // botellas tintinean con el golpe
     const shake = t >= T.hit ? Math.exp(-tb * 3.2) : 0;
@@ -405,8 +406,20 @@ async function main() {
     } else burst.intensity = 0;
   }
 
+  // precompila shaders y sube texturas ANTES de arrancar el reloj (si no, el primer cuadro se congela segundos)
+  foamHead.visible = true; crate.visible = true; blob.visible = true;
+  const warm1 = new THREE.Sprite(new THREE.SpriteMaterial({ map: soft, transparent: true, depthWrite: false })), warm2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloud, transparent: true, depthWrite: false }));
+  scene.add(warm1, warm2); camera.position.set(0, 6, 20); camera.lookAt(0, 2, 0);
+  try { if (renderer.compileAsync) await renderer.compileAsync(scene, camera); else renderer.compile(scene, camera); } catch (e) {}
+  renderer.render(scene, camera);
+  scene.remove(warm1, warm2); foamHead.visible = false;
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  let slow = 0, frames = 0;
   renderer.setAnimationLoop((now) => {
-    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    const raw = now - last, dt = Math.min(.05, raw / 1000); last = now;
+    if (document.hidden || (endShown && !parts.length)) return; // nada que dibujar
+    // calidad adaptativa: si el equipo no llega a ~40 fps, baja la resolución
+    if (++frames > 20 && frames < 400 && pr > .8) { slow = slow * .9 + (raw > 25 ? .1 : 0); if (slow > .6) { pr = Math.max(.8, pr - .25); renderer.setPixelRatio(pr); frame(); slow = 0; } }
     const t = (now - t0) / 1000;
     update(t, dt, now); stepParts(dt);
     renderer.render(scene, camera);
