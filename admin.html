@@ -15,7 +15,7 @@
 <body>
   <section class="login" id="login">
     <form class="login-card" id="loginForm">
-      <div class="logo">❄</div>
+      <div class="logo"><span>❄</span></div>
       <h1>Panel del negocio</h1>
       <p id="loginHint">Ingresa tu clave de administrador.</p>
       <input id="pass" type="password" autocomplete="current-password" placeholder="Clave" required>
@@ -29,34 +29,26 @@
     <aside class="side">
       <div class="side-brand"><span>❄</span><b id="brand">Bien Helada</b></div>
       <nav class="tabs" id="tabs">
-        <button data-tab="resumen" class="on"><i>📊</i><span>Resumen</span></button>
-        <button data-tab="pedidos"><i>🧾</i><span>Pedidos</span><b class="dot" id="pendDot" hidden>0</b></button>
-        <button data-tab="productos"><i>🍺</i><span>Productos</span></button>
-        <button data-tab="ajustes"><i>⚙️</i><span>Ajustes</span></button>
+        <button data-tab="resumen" class="on"><i><svg viewBox="0 0 24 24"><path d="M4 20V11M10 20V5M16 20v-7M22 20H2"/></svg></i><span>Resumen</span></button>
+        <button data-tab="pedidos"><i><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/></svg></i><span>Pedidos</span><b class="dot" id="pendDot" hidden>0</b></button>
+        <button data-tab="productos"><i><svg viewBox="0 0 24 24"><path d="M10 2h4v4l2 3v12a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V9l2-3zM8 13h8"/></svg></i><span>Productos</span></button>
+        <button data-tab="ajustes"><i><svg viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></i><span>Ajustes</span></button>
       </nav>
       <a class="side-link" href="./" target="_blank">Ver tienda ↗</a>
     </aside>
 
     <main class="main">
       <header class="bar">
-        <div>
+        <div class="bar-t">
           <h2 id="tabTitle">Resumen</h2>
-          <span class="sync" id="sync">—</span>
+          <span class="sync"><button class="store-pill" id="storePill" hidden></button><span id="sync">—</span></span>
         </div>
         <div class="bar-actions">
           <button class="ib" id="refresh" title="Actualizar" aria-label="Actualizar">↻</button>
           <button class="ib" id="logout" title="Salir" aria-label="Salir">⏻</button>
         </div>
       </header>
-      <div class="demo-banner" id="demoBanner" hidden>Modo demo: datos de ejemplo guardados solo en este navegador. Conecta Google Sheets para usarlo de verdad (ver LEEME.md). <button id="resetDemo">Reiniciar demo</button></div>
-
-      <div class="period" id="periodBox">
-        <div class="pchips" id="pchips">
-          <button data-p="hoy">Hoy</button><button data-p="7d">7 días</button><button data-p="quincena" class="on">Quincena</button><button data-p="mes">Mes</button><button data-p="qant">Quinc. ant.</button><button data-p="mant">Mes ant.</button><button data-p="rango">Rango</button>
-        </div>
-        <div class="range" id="range" hidden><input type="date" id="rDesde"><span>a</span><input type="date" id="rHasta"><button class="btn-sm" id="rApply">Ver</button></div>
-        <p class="plabel" id="plabel"></p>
-      </div>
+      <div class="demo-banner" id="demoBanner" hidden>Modo demo: datos de ejemplo, solo en este navegador. <button id="resetDemo">Reiniciar demo</button></div>
 
       <section class="view" id="v-resumen"></section>
       <section class="view" id="v-pedidos" hidden></section>

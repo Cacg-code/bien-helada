@@ -23,8 +23,9 @@ var API = (function () {
       var date = new Date(now - d * day), dow = date.getDay();
       var n = Math.round((dow === 5 || dow === 6 ? 6 : dow === 0 ? 4 : 2) + Math.random() * 3);
       for (var j = 0; j < n; j++) {
-        var f = new Date(date); f.setHours(16 + Math.floor(Math.random() * 7), Math.floor(Math.random() * 60), 0, 0);
-        if (f.getTime() > now) continue;
+        var HRS = [12, 14, 16, 17, 18, 18, 19, 19, 20, 20, 20, 21, 21, 21, 21, 22, 22, 22, 23, 23, 0];
+        var f = new Date(date), hh = HRS[Math.floor(Math.random() * HRS.length)]; f.setHours(hh, Math.floor(Math.random() * 60), 0, 0); if (hh === 0) f.setDate(f.getDate() + 1);
+        if (f.getTime() > now) { if (d === 0 && j < 4) f = new Date(now - (j + 1) * 23 * 60000); else continue; }
         var map = {}, k = 1 + Math.floor(Math.random() * 3);
         for (var x = 0; x < k; x++) { var p = pick(); map[p.id] = (map[p.id] || 0) + 1 + Math.floor(Math.random() * (p.forma === 'botella' || p.forma === 'lata' ? 6 : 2)); }
         var items = [], sub = 0, cost = 0;
@@ -33,7 +34,7 @@ var API = (function () {
           items.push({ id: id, nombre: pp.nombre + ' ' + pp.presentacion, cat: pp.categoria, cant: map[id], precio: pp.precio, costo: pp.costo });
           sub += pp.precio * map[id]; cost += pp.costo * map[id];
         }
-        var del = sub >= 60 ? 0 : 3, est = d === 0 && Math.random() < .6 ? 'pendiente' : (Math.random() < .07 ? 'cancelado' : 'entregado');
+        var del = sub >= 60 ? 0 : 3, age = now - f.getTime(), est = age < 3 * 3600e3 ? (Math.random() < .7 ? 'pendiente' : 'pagado') : (Math.random() < .07 ? 'cancelado' : 'entregado');
         seq++;
         out.push({ id: 'BH-' + ('000' + seq).slice(-4), fecha: f.toISOString(), estado: est,
           cliente: nombres[Math.floor(Math.random() * nombres.length)], telefono: '9' + Math.floor(10000000 + Math.random() * 89999999),
@@ -49,7 +50,7 @@ var API = (function () {
   }
 
   function ensureDemo() {
-    if (localStorage.getItem('bh_demo_v') !== '3') { [K.p, K.o, K.s].forEach(function (k) { localStorage.removeItem(k); }); localStorage.removeItem('bh_cat_cache'); localStorage.removeItem('bh_cart'); localStorage.setItem('bh_demo_v', '3'); }
+    if (localStorage.getItem('bh_demo_v') !== '4') { [K.p, K.o, K.s].forEach(function (k) { localStorage.removeItem(k); }); localStorage.removeItem('bh_cat_cache'); localStorage.removeItem('bh_cart'); localStorage.setItem('bh_demo_v', '4'); }
     if (!get(K.p)) set(K.p, Core.SEED);
     if (!get(K.c)) set(K.c, Core.DEF_CFG);
     if (!get(K.o)) set(K.o, seedOrders());
