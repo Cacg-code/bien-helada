@@ -70,3 +70,11 @@ En **Resumen → Ventas por grupo** verás cuál grupo vende más.
 - La web ya muestra **“Prohibida la venta de bebidas alcohólicas a menores de 18 años”** y **“Tomar bebidas alcohólicas en exceso es dañino”** (Ley 28681) y pide confirmar mayoría de edad.
 - Necesitas **licencia municipal** para venta de licor y respetar el horario de tu distrito.
 - Al entregar, pide DNI si dudas de la edad.
+
+## Fotos de productos (créditos)
+Fotos recortadas (fondo quitado) de fuentes con licencia libre, **no de Google Imágenes** (esas tienen derechos de autor):
+- **Wikimedia Commons** (CC BY / CC BY-SA / dominio público): Pilsen Callao, Cristal, Cusqueña, Corona Extra, Heineken (botella y lata), Russkaya, Johnnie Walker Red Label — ver cada archivo en commons.wikimedia.org (`PilsenCallao.jpg`, `CRISTAL.jpg`, `Cusqueña (5879671296).jpg`, `Corona_Extra_beer_bottle_(2019).png`, `Heineken_Bottle.jpg`, `Heineken-Dose.jpg`, `RusskayaVodka.jpg`, `Johnnie_Walker_Red_Label_2.jpg`).
+- **Open Food Facts** (CC BY-SA): Cusqueña Negra, Pisco 1615.
+- Los packs se armaron combinando esas mismas fotos. La botella de la pantalla de carga sale de la foto de Cristal.
+- Lo ideal: reemplazarlas por **fotos propias** del stock (celular, fondo blanco) — ponlas en `img/productos/` con el mismo nombre.
+- Las marcas son de sus dueños; se muestran solo para identificar el producto que vendes.

@@ -17,14 +17,6 @@
     if (m) sessionStorage.setItem('bh_ref', decodeURIComponent(m[2]).slice(0, 40));
   })();
 
-  /* ---------- verificación de edad ---------- */
-  function ageGate(done) {
-    if (localStorage.getItem('bh_18') === '1') return done();
-    var a = $('#age'); a.hidden = false; $('#ageYes').focus();
-    $('#ageYes').onclick = function () { localStorage.setItem('bh_18', '1'); a.hidden = true; done(); };
-    $('#ageNo').onclick = function () { $('#ageMsg').hidden = false; $('.age-btns').hidden = true; };
-  }
-
   /* ---------- datos ---------- */
   function setData(d) {
     S.cfg = Object.assign(Core.normConfig({}), d.config || {});
@@ -334,5 +326,12 @@
 
   /* ---------- inicio ---------- */
   loadData();
-  ageGate(function () { setTimeout(openFridge, reduced ? 0 : 700); });
+  /* la exhibidora se abre sola cuando aparece en pantalla (después de destapar) */
+  Intro.ready(function () {
+    if (!('IntersectionObserver' in window)) return openFridge();
+    var io = new IntersectionObserver(function (en) {
+      if (en[0].isIntersecting) { io.disconnect(); setTimeout(openFridge, reduced ? 0 : 250); }
+    }, { threshold: .35 });
+    io.observe($('#fridge'));
+  });
 })();

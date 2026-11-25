@@ -17,26 +17,26 @@ var Core = (function () {
   };
 
   var SEED = [
-    ['Pilsen Callao', 'Cervezas', 'botella', '630 ml', 7.5, 5.8, 48, '#1f6b3a', '', 'PILSEN', 1],
-    ['Cristal', 'Cervezas', 'botella', '650 ml', 7, 5.4, 48, '#c8102e', '', 'CRISTAL', 1],
-    ['Cusqueña Dorada', 'Cervezas', 'botella', '620 ml', 8, 6.2, 36, '#b8902f', '', 'CUSQUEÑA', 1],
-    ['Cusqueña Negra', 'Cervezas', 'botella', '620 ml', 8.5, 6.5, 24, '#2a1a10', '#2a160a', 'NEGRA', 1],
-    ['Corona Extra', 'Cervezas', 'botella', '355 ml', 7, 5.2, 24, '#1d3d8f', '#e9dfa8', 'CORONA', 1],
-    ['Pilsen Callao lata', 'Latas', 'lata', '355 ml', 4.5, 3.4, 48, '#1f6b3a', '', 'PILSEN', 1],
-    ['Cristal lata', 'Latas', 'lata', '355 ml', 4.5, 3.3, 48, '#c8102e', '', 'CRISTAL', 1],
-    ['Cusqueña lata', 'Latas', 'lata', '355 ml', 5, 3.8, 36, '#b8902f', '', 'CUSQUEÑA', 0],
-    ['Heineken lata', 'Latas', 'lata', '355 ml', 6, 4.5, 24, '#00843d', '', 'HEINEKEN', 1],
-    ['Six pack Pilsen', 'Packs', 'pack', 'x6 latas', 25, 19.5, 15, '#1f6b3a', '', 'x6', 1],
-    ['Caja Cristal', 'Packs', 'pack', 'x12 botellas', 72, 60, 8, '#c8102e', '', 'x12', 0],
-    ['Pack Corona', 'Packs', 'pack', 'x6 botellas', 38, 29, 10, '#1d3d8f', '', 'x6', 0],
-    ['Ron Cartavio Black', 'Licores', 'licor', '750 ml', 35, 26, 10, '#7a3b12', '', 'CARTAVIO', 1],
-    ['Pisco Quebranta', 'Licores', 'licor', '700 ml', 39, 29, 8, '#f2efe6', '', 'PISCO', 0],
-    ['Vodka Russkaya', 'Licores', 'licor', '750 ml', 28, 20, 10, '#e9f3f7', '', 'VODKA', 0],
-    ['Hielo en bolsa', 'Complementos', 'otro', '3 kg', 5, 2.5, 30, '#7fc8e8', '', 'HIELO', 1],
-    ['Coca-Cola', 'Complementos', 'otro', '1.5 L', 7.5, 5.6, 24, '#d0161b', '', 'COCA', 0]
+    ['Pilsen Callao', 'Cervezas', 'botella', '630 ml', 7.5, 5.8, 48, '#1f6b3a', '', 'PILSEN', 1, 'img/productos/pilsen.webp'],
+    ['Cristal', 'Cervezas', 'botella', '650 ml', 7, 5.4, 48, '#c8102e', '', 'CRISTAL', 1, 'img/productos/cristal.webp'],
+    ['Cusqueña Dorada', 'Cervezas', 'botella', '620 ml', 8, 6.2, 36, '#b8902f', '', 'CUSQUEÑA', 1, 'img/productos/cusquena.webp'],
+    ['Cusqueña Negra', 'Cervezas', 'botella', '620 ml', 8.5, 6.5, 24, '#2a1a10', '#2a160a', 'NEGRA', 1, 'img/productos/negra.webp'],
+    ['Corona Extra', 'Cervezas', 'botella', '355 ml', 7, 5.2, 24, '#1d3d8f', '#e9dfa8', 'CORONA', 1, 'img/productos/corona.webp'],
+    ['Heineken', 'Cervezas', 'botella', '330 ml', 7, 5.3, 24, '#00843d', '', 'HEINEKEN', 1, 'img/productos/heineken.webp'],
+    ['Heineken lata', 'Latas', 'lata', '355 ml', 6, 4.5, 24, '#00843d', '', 'HEINEKEN', 1, 'img/productos/heineken-lata.webp'],
+    ['Pilsen Callao lata', 'Latas', 'lata', '355 ml', 4.5, 3.4, 48, '#1f6b3a', '', 'PILSEN', 0, ''],
+    ['Cristal lata', 'Latas', 'lata', '355 ml', 4.5, 3.3, 48, '#c8102e', '', 'CRISTAL', 0, ''],
+    ['Six pack Heineken', 'Packs', 'pack', 'x6 latas', 32, 25, 15, '#00843d', '', 'x6', 1, 'img/productos/pack-heineken.webp'],
+    ['Caja Cristal', 'Packs', 'pack', 'x12 botellas', 72, 60, 8, '#c8102e', '', 'x12', 0, 'img/productos/pack-cristal.webp'],
+    ['Pack Corona', 'Packs', 'pack', 'x6 botellas', 38, 29, 10, '#1d3d8f', '', 'x6', 0, 'img/productos/pack-corona.webp'],
+    ['Johnnie Walker Red Label', 'Licores', 'licor', '750 ml', 65, 52, 6, '#7a3b12', '', 'RED', 1, 'img/productos/red-label.webp'],
+    ['Pisco 1615 Quebranta', 'Licores', 'licor', '700 ml', 39, 29, 8, '#f2efe6', '', 'PISCO', 1, 'img/productos/pisco.webp'],
+    ['Vodka Russkaya', 'Licores', 'licor', '750 ml', 28, 20, 10, '#e9f3f7', '', 'VODKA', 0, 'img/productos/vodka.webp'],
+    ['Hielo en bolsa', 'Complementos', 'otro', '3 kg', 5, 2.5, 30, '#7fc8e8', '', 'HIELO', 1, ''],
+    ['Coca-Cola', 'Complementos', 'otro', '1.5 L', 7.5, 5.6, 24, '#d0161b', '', 'COCA', 0, '']
   ].map(function (r, i) {
     return { id: 'p' + (i + 1), nombre: r[0], categoria: r[1], forma: r[2], presentacion: r[3], descripcion: '',
-      precio: r[4], costo: r[5], stock: r[6], color: r[7], vidrio: r[8], etiqueta: r[9], imagen: '',
+      precio: r[4], costo: r[5], stock: r[6], color: r[7], vidrio: r[8], etiqueta: r[9], imagen: r[11] || '',
       activo: true, destacado: !!r[10], orden: i + 1 };
   });
 

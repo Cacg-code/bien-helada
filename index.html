@@ -14,21 +14,35 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/store.css">
+  <link rel="stylesheet" href="css/intro.css">
+  <link rel="preload" href="img/intro-botella.webp" as="image">
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }</script>
 </head>
 <body>
-  <!-- Verificación de edad (Ley 28681) -->
-  <div class="age" id="age" role="dialog" aria-modal="true" aria-labelledby="ageT" hidden>
-    <div class="age-card">
-      <div class="age-badge">+18</div>
-      <h2 id="ageT">¿Eres mayor de edad?</h2>
-      <p>Para entrar debes tener 18 años o más.</p>
-      <div class="age-btns">
-        <button class="btn btn-ice" id="ageYes">Sí, tengo +18</button>
-        <button class="btn btn-ghost" id="ageNo">No</button>
+  <!-- Pantalla de carga: destapar la botella (incluye verificación de edad, Ley 28681) -->
+  <div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="inQ">
+    <div class="in-bg" aria-hidden="true"><i></i><i></i><i></i></div>
+    <p class="in-brand"><span aria-hidden="true">❄</span> <span data-cfg="nombre">Bien Helada</span></p>
+    <div class="in-stage">
+      <div class="in-bottle" id="inBottle">
+        <img class="in-body" src="img/intro-botella.webp" alt="" width="234" height="900" fetchpriority="high">
+        <img class="in-cap" id="inCap" src="img/intro-tapa.webp" alt="" width="112" height="38">
+        <span class="in-shine" aria-hidden="true"></span>
+        <span class="in-vapor" id="inVapor" aria-hidden="true"></span>
       </div>
-      <p class="age-no" id="ageMsg" hidden>Vuelve cuando cumplas 18. ¡Te esperamos! 🧃</p>
-      <small>Prohibida la venta de bebidas alcohólicas a menores de 18 años.</small>
+      <span class="in-shadow" aria-hidden="true"></span>
     </div>
+    <canvas class="in-foam" id="inFoam" aria-hidden="true"></canvas>
+    <div class="in-ui" id="inUi">
+      <p class="in-q" id="inQ">¿Eres mayor de 18 años?</p>
+      <button class="in-go" id="inGo" type="button"><span class="in-go-ico" aria-hidden="true">🍾</span><span id="inGoTxt">Sí, destapar</span></button>
+      <button class="in-no" id="inNo" type="button">No, soy menor</button>
+      <p class="in-msg" id="inMsg" hidden>Vuelve cuando cumplas 18. ¡Te esperamos! 🧃</p>
+      <div class="in-load" aria-hidden="true"><i id="inBar"></i></div>
+      <small class="in-temp" id="inTemp">Enfriando… 8 °C</small>
+      <small class="in-legal">🔊 Con sonido · Prohibida la venta de alcohol a menores de 18 años</small>
+    </div>
+    <p class="in-salud" id="inSalud" aria-hidden="true">¡Salud!</p>
   </div>
 
   <header class="top">
@@ -46,14 +60,31 @@
   <div class="notice" id="notice" hidden></div>
 
   <main id="inicio">
-    <section class="hero">
-      <div class="hero-copy">
+    <section class="h3d" id="hero">
+      <canvas class="h3d-canvas" id="h3d" aria-label="Botella bien helada en 3D. Arrastra para girarla."></canvas>
+      <img class="h3d-fallback" src="img/productos/cristal.webp" alt="" aria-hidden="true">
+      <div class="h3d-copy">
         <p class="eyebrow">Delivery de chelas · <span data-cfg="horarioCorto">hoy</span></p>
-        <h1>Bien <em>heladas</em>,<br>directo a tu puerta.</h1>
+        <h1><span class="h1-a">Bien</span> <em>heladas</em><span class="h1-b">directo a tu puerta.</span></h1>
         <p class="hero-sub" data-cfg="slogan">Chelas bien heladas, directo a tu puerta</p>
+        <div class="h3d-cta">
+          <a class="btn btn-amber" href="#exhibidora">Pedir ahora</a>
+          <a class="btn btn-ghost" href="#catalogo">Ver la carta</a>
+        </div>
         <div class="hero-pay"><span class="chip-yape">Yape</span><span class="chip-wa">WhatsApp</span><span class="chip-time">⏱ 30–45 min</span></div>
       </div>
+      <div class="h3d-meta" aria-hidden="true">
+        <span class="h3d-temp"><b id="h3dTemp">-2</b> °C</span>
+        <span class="h3d-drag">↻ Arrastra para girar</span>
+      </div>
+      <a class="h3d-scroll" href="#exhibidora" aria-label="Bajar a la exhibidora"><i></i></a>
+    </section>
 
+    <section class="exhib" id="exhibidora">
+      <div class="exhib-head">
+        <p class="eyebrow">La exhibidora</p>
+        <h2>Ábrela y elige <em>lo más helado</em></h2>
+      </div>
       <div class="stage" id="stage">
         <div class="scene">
           <div class="fridge" id="fridge">
@@ -139,6 +170,8 @@
   <script src="js/core.js"></script>
   <script src="js/api.js"></script>
   <script src="js/draw.js"></script>
+  <script src="js/intro.js"></script>
+  <script type="module" src="js/hero3d.js"></script>
   <script src="js/store.js"></script>
 </body>
 </html>
