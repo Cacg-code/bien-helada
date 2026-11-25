@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Prototipo · Intro con caja de cerveza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root { --amber: #ffb43d; --ice: #8fe3ff; --text: #ecf6ff; --muted: #8ea7bd; --display: 'Archivo', system-ui, sans-serif; --body: 'Manrope', system-ui, sans-serif; }
+* { box-sizing: border-box; margin: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; background: #050d18; color: var(--text); font-family: var(--body); }
+.scene { position: fixed; inset: 0; overflow: hidden;
+  background: radial-gradient(70% 45% at 50% 38%, #163a5c 0%, #0a1c2f 55%, #050d18 100%); }
+.scene::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 26%; pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, .55)); }
+.brand { position: absolute; top: max(18px, env(safe-area-inset-top)); left: 0; right: 0; text-align: center; z-index: 9;
+  font: 800 12px/1 var(--body); letter-spacing: .32em; text-transform: uppercase; color: var(--ice); opacity: .9; }
+.redo { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 12px; z-index: 20; padding: 7px 11px; border-radius: 999px; border: 1px solid rgba(143, 227, 255, .25);
+  background: rgba(5, 13, 24, .6); color: var(--ice); font: 700 12px var(--body); cursor: pointer; }
+.rig { position: absolute; inset: 0; transform-origin: 50% 80%; }
+.layer { position: absolute; display: block; }
+.crate-back { z-index: 1; } .bottle { z-index: 2; } .crate-front { z-index: 3; }
+.bottle { transform-origin: 0 0; will-change: transform; }
+.bottle .body { display: block; width: 100%; height: 100%; filter: drop-shadow(0 18px 24px rgba(0, 0, 0, .55)); }
+.bottle .cap { position: absolute; left: 24.36%; top: 0; width: 47.86%; height: auto; transform-origin: 50% 60%; }
+.bottle .shine { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 40% 40% 12% 12%;
+  -webkit-mask: url(../img/intro-botella.webp) center/100% 100%; mask: url(../img/intro-botella.webp) center/100% 100%; }
+.bottle .shine::before { content: ''; position: absolute; top: -20%; bottom: -20%; width: 40%; left: -60%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .45), transparent); transform: skewX(-12deg); }
+.ready .bottle .shine::before { animation: shine 3.2s .3s ease-in-out infinite; }
+.ready:not(.opening) .bottle .cap { animation: wiggle 2.4s 1s ease-in-out infinite; }
+@keyframes shine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+@keyframes wiggle { 0%, 86%, 100% { transform: rotate(0); } 90% { transform: rotate(-5deg) translateY(-1px); } 95% { transform: rotate(4deg); } }
+.vapor { position: absolute; left: 50%; top: -6%; width: 90%; height: 26%; translate: -50% 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(closest-side, rgba(220, 245, 255, .35), transparent); filter: blur(6px); }
+.ready .vapor { animation: vapor 3s ease-in-out infinite; }
+@keyframes vapor { 0% { opacity: 0; transform: translateY(10px) scale(.8); } 40% { opacity: .9; } 100% { opacity: 0; transform: translateY(-30px) scale(1.3); } }
+.crate-back.rattle .neck { animation: rattle .35s 2 ease-in-out; }
+.crate-back.rattle .neck:nth-child(2n) { animation-delay: .06s; }
+.crate-back.rattle .neck:nth-child(3n) { animation-delay: .12s; }
+@keyframes rattle { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(-2.5px) rotate(-2deg); } 70% { transform: translateY(1px) rotate(1.5deg); } }
+.neck { transform-box: fill-box; transform-origin: 50% 100%; }
+.shadow { position: absolute; z-index: 0; height: 28px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .75), transparent); opacity: 0; }
+.puff { position: absolute; z-index: 4; width: 14px; height: 14px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(225, 246, 255, .9), rgba(170, 225, 255, 0) 70%); }
+.ui { position: absolute; left: 0; right: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 0 20px; opacity: 0; pointer-events: none; }
+.ready .ui { opacity: 1; pointer-events: auto; transition: opacity .5s; }
+.ready .ui > * { animation: up .55s both cubic-bezier(.2, .8, .2, 1); }
+.ready .ui > :nth-child(2) { animation-delay: .08s; } .ready .ui > :nth-child(3) { animation-delay: .16s; } .ready .ui > :nth-child(4) { animation-delay: .24s; }
+@keyframes up { from { opacity: 0; transform: translateY(14px); } }
+.q { font: 800 clamp(20px, 5.6vw, 26px)/1.15 var(--display); text-align: center; }
+.go { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: min(100%, 340px); padding: 16px 22px; border: 0; border-radius: 999px; cursor: pointer;
+  background: linear-gradient(180deg, #ffd27f, var(--amber) 55%, #f29a12); color: #2b1600; font: 800 17px var(--body);
+  box-shadow: 0 0 0 2px rgba(143, 227, 255, .6), 0 12px 30px -8px rgba(255, 180, 61, .7); animation: up .55s both, halo 2.2s .6s infinite !important; }
+@keyframes halo { 0%, 100% { box-shadow: 0 0 0 2px rgba(143, 227, 255, .6), 0 12px 30px -8px rgba(255, 180, 61, .7); } 50% { box-shadow: 0 0 0 6px rgba(143, 227, 255, .18), 0 12px 40px -6px rgba(255, 180, 61, .9); } }
+.go:active { transform: scale(.97); }
+.no { background: none; border: 0; color: var(--muted); font: 700 14px var(--body); text-decoration: underline; cursor: pointer; padding: 4px; }
+.legal { color: var(--muted); font-size: 11px; text-align: center; opacity: .8; }
+.msg { color: var(--ice); font-weight: 700; text-align: center; }
+.opening .ui { opacity: 0; pointer-events: none; transition: opacity .25s; }
+.salud { position: absolute; left: 0; right: 0; z-index: 12; text-align: center; pointer-events: none; opacity: 0;
+  font: 900 clamp(46px, 15vw, 90px)/1 var(--display); font-stretch: 115%; color: var(--amber); text-shadow: 0 6px 30px rgba(255, 180, 61, .55); }
+.foam { position: absolute; z-index: 11; border-radius: 50%; pointer-events: none; background: radial-gradient(circle at 35% 35%, #fff, #fff4d8 45%, rgba(255, 236, 190, .2) 75%); }
+.end { position: absolute; inset: 0; z-index: 30; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center;
+  background: rgba(5, 13, 24, .86); backdrop-filter: blur(6px); }
+.end.on { display: flex; animation: up .4s both; }
+.end h2 { font: 800 22px var(--display); } .end p { color: var(--muted); max-width: 320px; }
+.end a, .end button { font: 800 15px var(--body); padding: 13px 22px; border-radius: 999px; border: 0; cursor: pointer; text-decoration: none; }
+.end .b1 { background: var(--amber); color: #2b1600; } .end .b2 { background: transparent; color: var(--ice); border: 1px solid rgba(143, 227, 255, .35); }
+</style>
+</head>
+<body>
+<div class="scene" id="scene">
+  <p class="brand">❄ Bien Helada</p>
+  <button class="redo" id="redo" type="button">↻ Repetir</button>
+  <span class="shadow" id="shadow"></span>
+  <div class="rig" id="rig">
+    <!-- parte de atrás de la caja: borde superior, interior y cuellos de las otras botellas -->
+    <svg class="layer crate-back" id="cBack" viewBox="0 0 330 224" aria-hidden="true">
+      <defs>
+        <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7a548"/><stop offset="1" stop-color="#d9731a"/></linearGradient>
+        <linearGradient id="hole" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#140801"/><stop offset="1" stop-color="#2c1405"/></linearGradient>
+        <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4a2203"/><stop offset=".35" stop-color="#b8650f"/><stop offset=".55" stop-color="#e39233"/><stop offset="1" stop-color="#5a2a05"/></linearGradient>
+        <radialGradient id="capg" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#fff1b8"/><stop offset=".45" stop-color="#e8b23a"/><stop offset="1" stop-color="#8a5b0c"/></radialGradient>
+      </defs>
+      <path d="M0 62 L24 2 Q26 0 30 0 L300 0 Q304 0 306 2 L330 62 Z" fill="url(#rim)"/>
+      <path d="M15 58 L33 9 L297 9 L315 58 Z" fill="url(#hole)"/>
+      <g stroke="#3b1c06" stroke-width="2" opacity=".8">
+        <path d="M24 33 L306 33"/><path d="M99 9 L93 58"/><path d="M165 9 L165 58"/><path d="M231 9 L237 58"/>
+      </g>
+      <g id="necks"></g>
+    </svg>
+    <div class="layer bottle" id="bottle">
+      <img class="body" src="../img/intro-botella.webp" alt="" width="234" height="900">
+      <img class="cap" id="cap" src="../img/intro-tapa.webp" alt="" width="112" height="38">
+      <span class="shine"></span><span class="vapor"></span>
+    </div>
+    <!-- cara frontal de la caja (javita) -->
+    <svg class="layer crate-front" id="cFront" viewBox="0 0 330 224" aria-hidden="true">
+      <defs>
+        <linearGradient id="front" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef8d2c"/><stop offset=".5" stop-color="#d8701a"/><stop offset="1" stop-color="#a24e0b"/></linearGradient>
+        <linearGradient id="side" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset=".08" stop-color="#000" stop-opacity="0"/><stop offset=".92" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+        <linearGradient id="lip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc06e"/><stop offset="1" stop-color="#e07c22"/></linearGradient>
+      </defs>
+      <path d="M0 60 L330 60 L330 214 Q330 224 320 224 L10 224 Q0 224 0 214 Z" fill="url(#front)"/>
+      <path d="M0 60 L330 60 L330 214 Q330 224 320 224 L10 224 Q0 224 0 214 Z" fill="url(#side)"/>
+      <rect x="0" y="56" width="330" height="13" rx="3" fill="url(#lip)"/>
+      <rect x="0" y="66" width="330" height="3" fill="#8c3f08" opacity=".45"/>
+      <rect x="122" y="78" width="86" height="18" rx="9" fill="#2a1203"/>
+      <rect x="122" y="78" width="86" height="5" rx="2.5" fill="#000" opacity=".35"/>
+      <g fill="#b85a0e" opacity=".55">
+        <rect x="16" y="78" width="9" height="128" rx="4"/><rect x="305" y="78" width="9" height="128" rx="4"/>
+        <rect x="44" y="108" width="6" height="96" rx="3"/><rect x="280" y="108" width="6" height="96" rx="3"/>
+      </g>
+      <rect x="62" y="110" width="206" height="66" rx="10" fill="#c2600f"/>
+      <rect x="62" y="110" width="206" height="66" rx="10" fill="none" stroke="#ffb15a" stroke-opacity=".45" stroke-width="2"/>
+      <text x="165" y="146" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="27" letter-spacing="2" fill="#7a3604">BIEN HELADA</text>
+      <text x="165" y="144" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="27" letter-spacing="2" fill="#ffe2b5">BIEN HELADA</text>
+      <text x="165" y="166" text-anchor="middle" font-family="Manrope, sans-serif" font-weight="800" font-size="11" letter-spacing="3" fill="#ffd9a6" opacity=".85">12 × 620 ML · BIEN FRÍAS</text>
+      <rect x="0" y="200" width="330" height="24" rx="8" fill="#000" opacity=".18"/>
+      <path d="M8 196 H322" stroke="#ffb15a" stroke-opacity=".3" stroke-width="2"/>
+    </svg>
+  </div>
+  <div class="ui" id="ui">
+    <p class="q" id="q">¿Eres mayor de 18 años?</p>
+    <button class="go" id="go" type="button"><span aria-hidden="true">🍾</span> Sí · Destapar</button>
+    <button class="no" id="no" type="button">No, soy menor</button>
+    <small class="legal">🔊 Con sonido · Prohibida la venta de alcohol a menores de 18 años</small>
+  </div>
+  <p class="salud" id="salud">¡Salud!</p>
+  <div class="end" id="end">
+    <h2>Aquí entraría a la tienda</h2>
+    <p>Esto es solo el prototipo de la pantalla de carga. Si te gusta, la reemplazo en la web.</p>
+    <button class="b1" id="again" type="button">↻ Ver otra vez</button>
+    <a class="b2" href="../">Ir a la tienda actual</a>
+  </div>
+</div>
+<script>
+(function () {
+  var $ = function (s) { return document.getElementById(s); };
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Sonido (Web Audio, sin archivos) ---------- */
+  var ac = null;
+  function unlock() { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} }
+  function noise(dur) { var b = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate), d = b.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; var s = ac.createBufferSource(); s.buffer = b; return s; }
+  function env(node, t, peak, dur) { var g = ac.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + .005); g.gain.exponentialRampToValueAtTime(.001, t + dur); node.connect(g); g.connect(ac.destination); return g; }
+  function thud() { if (!ac || ac.state !== 'running') return; var t = ac.currentTime, o = ac.createOscillator(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(45, t + .25); env(o, t, .7, .3); o.start(t); o.stop(t + .3);
+    var n = noise(.15), f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 900; n.connect(f); env(f, t, .35, .12); n.start(t); clink(.05); clink(.12); }
+  function clink(delay) { if (!ac || ac.state !== 'running') return; var t = ac.currentTime + (delay || 0); [2400, 3150, 4300].forEach(function (fr, i) { var o = ac.createOscillator(); o.type = 'sine'; o.frequency.value = fr * (1 + Math.random() * .04); env(o, t + i * .004, .07, .35); o.start(t); o.stop(t + .4); }); }
+  function pop() { var t = ac.currentTime, o = ac.createOscillator(); o.frequency.setValueAtTime(520, t); o.frequency.exponentialRampToValueAtTime(90, t + .09); env(o, t, .8, .12); o.start(t); o.stop(t + .15);
+    var n = noise(1.6), f = ac.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 3500; n.connect(f); var g = env(f, t + .03, .22, 1.5); n.start(t + .03); }
+
+  /* ---------- Geometría ---------- */
+  var G = {};
+  function layout() {
+    var vw = innerWidth, vh = innerHeight;
+    var W = Math.min(vw * .82, 340, vh * .44), u = W / 330;
+    var crateBottom = vh * .8, crateTop = crateBottom - 224 * u, crateLeft = (vw - W) / 2;
+    var H = Math.min(vh * .47, 430), bw = H * 234 / 900, bTop = vh * .09, bLeft = (vw - bw) / 2;
+    G = { u: u, W: W, crateTop: crateTop, crateLeft: crateLeft, H: H, bw: bw, bTop: bTop, bLeft: bLeft, vh: vh };
+    [$('cBack'), $('cFront')].forEach(function (s) { s.style.cssText = 'left:' + crateLeft + 'px;top:' + crateTop + 'px;width:' + W + 'px;height:' + 224 * u + 'px'; });
+    var b = $('bottle'); b.style.left = bLeft + 'px'; b.style.top = bTop + 'px'; b.style.width = bw + 'px'; b.style.height = H + 'px';
+    var sh = $('shadow'); sh.style.left = (crateLeft - 10) + 'px'; sh.style.width = (W + 20) + 'px'; sh.style.top = (crateBottom - 14) + 'px';
+    $('ui').style.top = (bTop + H + vh * .035) + 'px';
+    $('salud').style.top = (bTop + H * .38) + 'px';
+    // botella dentro de la caja: columna 2, fila de adelante
+    var h0 = 165 * u, w0 = h0 * 234 / 900, x0 = crateLeft + 132 * u - w0 / 2, y0 = crateTop + 20 * u, s0 = h0 / H;
+    G.inCrate = 'translate(' + (x0 - bLeft) + 'px,' + (y0 - bTop) + 'px) scale(' + s0 + ')';
+    G.raised = 'translate(' + (x0 - bLeft) + 'px,' + (y0 - bTop - 205 * u) + 'px) scale(' + s0 * 1.08 + ')';
+  }
+  function necks() {
+    var cols = [72, 132, 198, 258], rows = [{ y: 26, k: .74 }, { y: 41, k: .86 }, { y: 56, k: 1 }], html = '';
+    rows.forEach(function (r, ri) {
+      cols.forEach(function (cx, ci) {
+        if (ri === 2 && ci === 1) return; // ese hueco es la que sale
+        var x = 165 + (cx - 165) * (.86 + ri * .07), w = 15 * r.k, h = 34 * r.k, top = r.y - h;
+        html += '<g class="neck"><rect x="' + (x - w / 2) + '" y="' + top + '" width="' + w + '" height="' + h + '" rx="' + w * .3 + '" fill="url(#glass)"/>' +
+          '<rect x="' + (x - w * .62) + '" y="' + (top - 1) + '" width="' + w * 1.24 + '" height="' + 6 * r.k + '" rx="2" fill="url(#capg)"/>' +
+          '<ellipse cx="' + x + '" cy="' + (top - 1) + '" rx="' + w * .62 + '" ry="' + 2.6 * r.k + '" fill="#f6d77a"/></g>';
+      });
+    });
+    $('necks').innerHTML = html;
+  }
+
+  /* ---------- Secuencia ---------- */
+  var timers = [], anims = [], opening = false;
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+  function anim(el, kf, opt) { var a = el.animate(kf, Object.assign({ fill: 'forwards' }, opt)); anims.push(a); return a; }
+  function puff() {
+    var sc = $('scene'), y = G.crateTop + 224 * G.u - 8;
+    for (var i = 0; i < 22; i++) {
+      var p = document.createElement('span'); p.className = 'puff'; sc.appendChild(p);
+      var side = i % 2 ? 1 : -1, x = innerWidth / 2 + side * (G.W / 2 - 10) * Math.random();
+      p.style.left = x + 'px'; p.style.top = y + 'px';
+      var dx = side * (30 + Math.random() * 90), dy = -10 - Math.random() * 45, s = 1.5 + Math.random() * 3.5;
+      p.animate([{ transform: 'translate(0,0) scale(.4)', opacity: .9 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + s + ')', opacity: 0 }], { duration: 700 + Math.random() * 500, easing: 'cubic-bezier(.1,.7,.3,1)' }).onfinish = (function (el) { return function () { el.remove(); }; })(p);
+    }
+  }
+  function play() {
+    timers.forEach(clearTimeout); timers = []; anims.forEach(function (a) { a.cancel(); }); anims = []; opening = false;
+    var sc = $('scene'); sc.classList.remove('ready', 'opening'); $('end').classList.remove('on');
+    $('go').hidden = false; $('no').hidden = false; $('q').hidden = false; var m = document.querySelector('.msg'); if (m) m.remove();
+    layout(); necks();
+    var b = $('bottle'); b.style.transform = G.inCrate; $('cap').style.transform = '';
+    if (reduced) { b.style.transform = 'none'; $('cBack').style.opacity = 0; $('cFront').style.opacity = 0; sc.classList.add('ready'); return; }
+    $('cBack').style.opacity = ''; $('cFront').style.opacity = '';
+    // 1) cae la caja
+    anim($('rig'), [
+      { transform: 'translateY(-115vh) rotate(-8deg)', easing: 'cubic-bezier(.55,0,.95,.55)' },
+      { transform: 'translateY(0) rotate(0)', offset: .66, easing: 'ease-out' },
+      { transform: 'translateY(0) scale(1.05,.92)', offset: .74, easing: 'ease-out' },
+      { transform: 'translateY(-14px) rotate(1deg) scale(.98,1.03)', offset: .86, easing: 'ease-in' },
+      { transform: 'translateY(0) rotate(0) scale(1)' }], { duration: 1000 });
+    anim($('shadow'), [{ opacity: 0, transform: 'scaleX(.3)' }, { opacity: .2, transform: 'scaleX(.6)', offset: .6 }, { opacity: 1, transform: 'scaleX(1.1)', offset: .7 }, { opacity: .85, transform: 'scaleX(1)' }], { duration: 1000 });
+    later(function () {
+      puff(); thud(); try { navigator.vibrate && navigator.vibrate(35); } catch (e) {}
+      $('scene').animate([{ transform: 'translateY(0)' }, { transform: 'translateY(5px)' }, { transform: 'translateY(-2px)' }, { transform: 'none' }], { duration: 260 });
+    }, 660);
+    // 2) tiemblan las botellas
+    later(function () { var c = $('cBack'); c.classList.remove('rattle'); void c.getBBox(); c.classList.add('rattle'); clink(0); clink(.09); }, 1150);
+    // 3) sale una cerveza
+    later(function () {
+      clink(0);
+      anim(b, [{ transform: G.inCrate, easing: 'cubic-bezier(.3,0,.2,1)' }, { transform: G.raised, offset: .42, easing: 'cubic-bezier(.5,0,.15,1)' }, { transform: 'none' }], { duration: 1500 });
+    }, 1500);
+    // 4) la caja se va
+    later(function () {
+      [$('cBack'), $('cFront')].forEach(function (el) { anim(el, [{ transform: 'none', opacity: 1 }, { transform: 'translateY(38vh) scale(.92)', opacity: 0 }], { duration: 750, easing: 'cubic-bezier(.5,0,.75,0)' }); });
+      anim($('shadow'), [{ opacity: .85 }, { opacity: 0 }], { duration: 600 });
+    }, 2050);
+    // 5) pregunta + destapar
+    later(function () { sc.classList.add('ready'); $('go').focus({ preventScroll: true }); }, 2950);
+  }
+  function foam(x, y) {
+    var sc = $('scene');
+    for (var i = 0; i < 46; i++) {
+      var f = document.createElement('span'), s = 5 + Math.random() * 16; f.className = 'foam'; f.style.width = f.style.height = s + 'px';
+      f.style.left = (x - s / 2) + 'px'; f.style.top = (y - s / 2) + 'px'; sc.appendChild(f);
+      var ang = -Math.PI / 2 + (Math.random() - .5) * 1.5, v = 90 + Math.random() * 260, dx = Math.cos(ang) * v, dy = Math.sin(ang) * v;
+      f.animate([{ transform: 'translate(0,0) scale(.3)', opacity: 1 }, { transform: 'translate(' + dx * .7 + 'px,' + dy + 'px) scale(1)', opacity: 1, offset: .45 },
+        { transform: 'translate(' + dx + 'px,' + (dy + 260) + 'px) scale(.6)', opacity: 0 }], { duration: 1100 + Math.random() * 600, delay: Math.random() * 180, easing: 'cubic-bezier(.2,.6,.4,1)' }).onfinish = (function (el) { return function () { el.remove(); }; })(f);
+    }
+  }
+  function uncork() {
+    if (opening) return; opening = true; unlock(); try { pop(); } catch (e) {}
+    try { navigator.vibrate && navigator.vibrate([20, 40, 30]); } catch (e) {}
+    var sc = $('scene'); sc.classList.add('opening');
+    var cap = $('cap'), r = cap.getBoundingClientRect();
+    $('bottle').animate([{ transform: 'none' }, { transform: 'rotate(-3deg)' }, { transform: 'rotate(2.5deg)' }, { transform: 'none' }], { duration: 300 });
+    cap.animate([{ transform: 'none' }, { transform: 'translate(70px,-' + (G.bTop + 140) + 'px) rotate(560deg)', opacity: 1, offset: .7 }, { transform: 'translate(95px,-' + (G.bTop + 220) + 'px) rotate(720deg)', opacity: 0 }], { duration: 900, easing: 'cubic-bezier(.15,.7,.3,1)', fill: 'forwards' });
+    foam(r.left + r.width / 2, r.top + r.height / 2);
+    setTimeout(function () { $('salud').animate([{ opacity: 0, transform: 'scale(.6) rotate(-6deg)' }, { opacity: 1, transform: 'scale(1.08) rotate(-3deg)', offset: .5 }, { opacity: 1, transform: 'scale(1) rotate(-3deg)' }], { duration: 600, fill: 'forwards', easing: 'cubic-bezier(.2,.9,.3,1.3)' }); }, 380);
+    setTimeout(function () { $('end').classList.add('on'); $('salud').getAnimations().forEach(function (a) { a.cancel(); }); }, 2100);
+  }
+  $('go').addEventListener('click', uncork);
+  $('bottle').addEventListener('click', function () { if ($('scene').classList.contains('ready')) uncork(); });
+  $('no').addEventListener('click', function () { $('go').hidden = true; $('no').hidden = true; $('q').hidden = true; var p = document.createElement('p'); p.className = 'msg'; p.textContent = 'Vuelve cuando cumplas 18. ¡Te esperamos! 🧃'; $('ui').prepend(p); });
+  $('redo').addEventListener('click', function () { unlock(); play(); });
+  $('again').addEventListener('click', function () { unlock(); play(); });
+  var rt; addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (!opening) { layout(); if ($('scene').classList.contains('ready')) $('bottle').style.transform = 'none'; } }, 200); });
+  var img = new Image(); img.onload = img.onerror = function () { (document.fonts ? document.fonts.ready : Promise.resolve()).then(play); }; img.src = '../img/intro-botella.webp';
+})();
+</script>
+</body>
+</html>

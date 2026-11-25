@@ -49,7 +49,7 @@ var API = (function () {
   }
 
   function ensureDemo() {
-    if (localStorage.getItem('bh_demo_v') !== '2') { [K.p, K.o, K.s].forEach(function (k) { localStorage.removeItem(k); }); localStorage.removeItem('bh_cat_cache'); localStorage.removeItem('bh_cart'); localStorage.setItem('bh_demo_v', '2'); }
+    if (localStorage.getItem('bh_demo_v') !== '3') { [K.p, K.o, K.s].forEach(function (k) { localStorage.removeItem(k); }); localStorage.removeItem('bh_cat_cache'); localStorage.removeItem('bh_cart'); localStorage.setItem('bh_demo_v', '3'); }
     if (!get(K.p)) set(K.p, Core.SEED);
     if (!get(K.c)) set(K.c, Core.DEF_CFG);
     if (!get(K.o)) set(K.o, seedOrders());

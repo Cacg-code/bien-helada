@@ -51,32 +51,32 @@
   /* ---------- exhibidora 3D ---------- */
   function cols() { return innerWidth >= 720 ? 4 : 3; }
   function ml(p) { var m = String(p.presentacion).match(/([\d.]+)\s*(ml|l)\b/i); return m ? +m[1] * (/^l$/i.test(m[2]) ? 1000 : 1) : 600; }
-  function sizeOf(p) { return p.forma === 'lata' ? .6 : p.forma === 'botella' ? (ml(p) >= 500 ? 1 : .86) : .92; }
+  function sizeOf(p) { return { lata: ml(p) > 400 ? .7 : .6, botella: ml(p) >= 500 ? 1 : ml(p) < 300 ? .78 : .86, licor: .96, pack: .7, otro: .68 }[p.forma] || .8; }
+  var ORD = { licor: 0, botella: 1, lata: 2, pack: 3, otro: 4 };
   function renderFridge() {
-    // como una exhibidora real: solo lo que va helado, varias unidades por producto y alturas reales
-    var c = cols(), all = S.prods;
-    var bottles = all.filter(function (p) { return p.forma === 'botella'; }).sort(function (x, y) { return ml(y) - ml(x) || (y.destacado - x.destacado); });
-    var cans = all.filter(function (p) { return p.forma === 'lata'; });
-    var others = all.filter(function (p) { return p.forma === 'otro'; });
-    if (!bottles.length) bottles = all.slice();
-    if (!bottles.length) return;
-    var big = bottles.filter(function (p) { return ml(p) >= 500; }), small = bottles.filter(function (p) { return ml(p) < 500; });
-    var plan = [big.length ? big : bottles, big.length > c ? big.slice(c).concat(small) : (small.length ? small : bottles),
-      small.length ? small : bottles, cans.length ? cans : (others.length ? others : bottles)];
-    var used = {}, html = '', k = 0;
-    plan.forEach(function (grp, r) {
-      var start = used[r] || 0;
+    // una bebida por espacio, todas distintas (solo se repiten si faltan productos); las altas arriba
+    var c = cols(), slots = c * 4;
+    var list = S.prods.slice().sort(function (x, y) {
+      return (ORD[x.forma] - ORD[y.forma]) || (y.forma === 'botella' ? ml(y) - ml(x) : 0) || ((y.destacado ? 1 : 0) - (x.destacado ? 1 : 0));
+    });
+    if (!list.length) return;
+    if (list.length > slots) {
+      // si hay más productos que espacios: primero los destacados, sin perder el orden por altura
+      var keep = list.filter(function (p) { return p.destacado; }).concat(list.filter(function (p) { return !p.destacado; })).slice(0, slots);
+      list = list.filter(function (p) { return keep.indexOf(p) >= 0; });
+    }
+    var html = '', k = 0;
+    for (var r = 0; r < 4; r++) {
       html += '<div class="shelf" style="--cols:' + c + '">';
       for (var j = 0; j < c; j++) {
-        var p = grp[(start + j) % grp.length], out = p.stock === 0, can = p.forma === 'lata';
-        var n = 3, imgs = '';
-        for (var f = n - 1; f >= 0; f--) imgs += '<span class="fc fc' + f + '">' + Draw.product(p, f ? 'art-b' : 'art') + '</span>';
-        html += '<button class="f-item' + (out ? ' out' : '') + (can ? ' is-can' : '') + '" data-add="' + esc(p.id) + '" style="--i:' + (k++) + ';--h:' + sizeOf(p) + '" aria-label="Agregar ' + esc(p.nombre) + ' ' + money(p.precio) + '">' +
-          '<span class="facing">' + imgs + '</span>' +
+        var p = list[k % list.length], out = p.stock === 0;
+        html += '<button class="f-item' + (out ? ' out' : '') + (p.forma === 'lata' ? ' is-can' : '') + '" data-add="' + esc(p.id) + '" style="--i:' + k + ';--h:' + sizeOf(p) + '" aria-label="Agregar ' + esc(p.nombre) + ' ' + money(p.precio) + '">' +
+          '<span class="facing"><span class="fc fc0">' + Draw.product(p, 'art') + '</span></span>' +
           '<span class="tag"><small>' + esc(p.nombre.replace(/ lata$/i, '')) + '</small><b>' + money(p.precio).replace('S/ ', 'S/') + '</b></span></button>';
+        k++;
       }
       html += '</div>';
-    });
+    }
     $('#shelves').innerHTML = html;
   }
   function openFridge() {
